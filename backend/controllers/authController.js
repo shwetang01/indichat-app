@@ -1,8 +1,11 @@
 const { response } = require("express");
 const otpGenerate = require("../utils/otpGenerator");
 const User = require("../models/user");
-
+const sendOtpToEmail = require("../services/emailService");
+const response = require("../utils/responseHandler");
+const tiwlloService = require('../services/twilloServices');
 // step1 sending otp
+
 const sentOtp = async(req,res) =>{
     const {phoneNumber,phoneSuffix,email}= req.body;
     const otp= otpGenerate();
@@ -17,6 +20,8 @@ const sentOtp = async(req,res) =>{
             user.emailOtp = otp;
             user.emailOtpExpiry = expiry;
             await user.save();
+            await sendOtpToEmail(email,otp);
+
             return response(res,200,'Otp send to your email',{email});
         }
         if(!phoneNumber || !phoneSuffix){
@@ -28,7 +33,10 @@ const sentOtp = async(req,res) =>{
         if(!user){
             user = await new User({phoneNumber,phoneSuffix})
         }
+
+        await tiwlloService.sendOtpToPhoneNumber(fullPhoneNumber);
         await user.save();
+
         return response(res,200,"Otp send successfully",user);
 
     } catch (error) {
@@ -36,4 +44,40 @@ const sentOtp = async(req,res) =>{
         return response(res,500,'Internal sarver error')
 
     }
+}
+
+// step2 verify otp
+
+const verifyOtp = async(req,res)=>{
+     const {phoneNumber,phoneSuffix,email,otp}= req.body;
+
+     try {
+        let user;
+        if(email){
+            user= await User.findOne({email});
+            if(!user){
+                return response(res,404,'user not found')
+            }
+            const now= new Date();
+            if(!user.emailOtp || String(user.emailOtp)!==String(otp) ||now > new Date(user.emailOtpExpiry) ){
+                return  response(res,400,'Invalid or expired otp')
+            };
+            user.isVerified =true;
+            user.emailOtp= null;
+            user.emailOtpExpiry= null;  
+            await user.save();  
+        }
+        else{
+            if (!phoneNumber || !phoneSuffix){
+                return response(res,400,'phone number and phone suffix are required');
+            }
+            user=
+        }
+
+     } catch (error) {
+        
+     }
+
+
+
 }
