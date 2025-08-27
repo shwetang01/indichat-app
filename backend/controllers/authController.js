@@ -71,7 +71,18 @@ const verifyOtp = async(req,res)=>{
             if (!phoneNumber || !phoneSuffix){
                 return response(res,400,'phone number and phone suffix are required');
             }
-            user=
+            const fullPhoneNumber =`${phoneSuffix}${phoneNumber}`;
+            user= await User.findOne({phoneNumber});
+             if(!user){
+                return response(res,404,'user not found')
+            }
+            const result = await tiwlloService.verifyOtp(fullPhoneNumber,otp);
+            if(result.status !== 'approved'){
+                return response(res,400,'Invalid Otp');
+            }
+            user.isVerified=true;
+            await user.save();
+
         }
 
      } catch (error) {
