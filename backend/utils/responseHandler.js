@@ -11,4 +11,4 @@ const response = (res,statusCode,message,data=null)=>{
 
 }
 
-module.exports = response;
+module.expo = response;
