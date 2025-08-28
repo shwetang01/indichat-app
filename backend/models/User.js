@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   emailOtp:{type:String},
   emailOtpExpiry:{type:Date},
   profilePicture:{type:String},
+  username:{type:String},
   about:{type:String},
   lastSeen:{type:Date},
   isOnline:{type:Boolean, default:false},
