@@ -189,6 +189,7 @@ const getAllUsers= async (req,res) =>{
 
             })
         );
+        return response(res,200,'users retrive successfully',usersWithConversation);
     } catch (error) {
          console.error(error);
         return response(res,500,'Internal sarver error');
