@@ -7,7 +7,7 @@ const authMiddleware = (req,res,next)=>{
     const authToken = req.cookies?.auth_token;
 
     if(!authToken){
-        return response(res,401,'authorization token is missing. please provide token')
+        return response(res,401,'authorization token is missing.please provide token')
     }
 
     try {

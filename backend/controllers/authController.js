@@ -6,6 +6,7 @@ const response = require("../utils/responseHandler");
 const twilloService = require('../services/twilloServices');
 const generateToken = require("../utils/generateToken");
 const { uploadFileToCloudinary } = require("../config/cloudinaryConfig");
+const Conversation = require('../models/Conversation');
 
 // step1 sending otp
 
@@ -133,6 +134,27 @@ const updateProfile = async(req,res) =>{
     }
 }
 
+const checkAuthentication = async(req,res)=>{
+    try {
+        const userId= req.user.userId;
+        if(!userId){
+            return response(res,404,'unathorized! please login before access our app')
+
+        }
+        const user = await User.findById(userId);
+        if(!user){
+            return response(res,404,'user not found');
+        }
+
+        return response(res,200,'user retrived and allowed to use aour app',user);
+
+    } catch (error) {
+          console.error(error);
+        return response(res,500,'Internal sarver error');
+    }
+}
+
+
 const logout= (req,res) =>{
     try {
         res.cookie("auth_token","",{expires:new Date(0)});
@@ -143,6 +165,39 @@ const logout= (req,res) =>{
     }
 }
 
+
+const getAllUsers= async (req,res) =>{
+    const loggedInUser = req.user.userId;
+    try {
+        const users= await User.find({_id:{$ne:loggedInUser}}).select(
+            "username profilePicture lastSeen isOnline about "
+        ).lean();
+
+        const usersWithConversation = await Promise.all(
+            users.map(async (user)=>{
+                const conversation = await Conversation.findOne({
+                    participants:{$all:[loggedInUser,user?._id]}
+                }).populate({
+                    path:"lastMessage",
+                    select :'content createdAt sender receiver'
+                }).lean();
+
+                return {
+                    ...user,
+                    conversation: conversation || null
+                }
+
+            })
+        );
+    } catch (error) {
+         console.error(error);
+        return response(res,500,'Internal sarver error');
+        
+    }
+}
+
+
+
 module.exports = {
-    sendOtp,verifyOtp, updateProfile,logout
+    sendOtp,verifyOtp, updateProfile,logout,checkAuthentication,getAllUsers
 };
