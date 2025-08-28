@@ -4,6 +4,7 @@ const User = require("../models/user");
 const sendOtpToEmail = require("../services/emailService");
 const response = require("../utils/responseHandler");
 const tiwlloService = require('../services/twilloServices');
+const generateToken = require("../utils/generateToken");
 // step1 sending otp
 
 const sentOtp = async(req,res) =>{
@@ -84,9 +85,16 @@ const verifyOtp = async(req,res)=>{
             await user.save();
 
         }
+        const token= generateToken(user?._id);
+        res.cookie("auth_token",token,{
+            httpOnly:true,
+            maxAge: 1000*365*24*60*60
+        });
+        return response(res,200,'Otp verified successfully',{token,user})
 
      } catch (error) {
-        
+        console.error(error);
+        return response(res,500,'Internal sarver error')
      }
 
 
