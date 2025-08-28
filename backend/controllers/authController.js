@@ -1,13 +1,14 @@
-const { response } = require("express");
+
 const otpGenerate = require("../utils/otpGenerator");
 const User = require("../models/user");
 const sendOtpToEmail = require("../services/emailService");
 const response = require("../utils/responseHandler");
-const tiwlloService = require('../services/twilloServices');
+const twilloService = require('../services/twilloServices');
 const generateToken = require("../utils/generateToken");
+
 // step1 sending otp
 
-const sentOtp = async(req,res) =>{
+const sendOtp = async(req,res) =>{
     const {phoneNumber,phoneSuffix,email}= req.body;
     const otp= otpGenerate();
     const expiry =new Date(Date.now() +5*60*1000);
@@ -35,7 +36,7 @@ const sentOtp = async(req,res) =>{
             user = await new User({phoneNumber,phoneSuffix})
         }
 
-        await tiwlloService.sendOtpToPhoneNumber(fullPhoneNumber);
+        await twilloService.sendOtpToPhoneNumber(fullPhoneNumber);
         await user.save();
 
         return response(res,200,"Otp send successfully",user);
@@ -77,7 +78,7 @@ const verifyOtp = async(req,res)=>{
              if(!user){
                 return response(res,404,'user not found')
             }
-            const result = await tiwlloService.verifyOtp(fullPhoneNumber,otp);
+            const result = await twilloService.verifyOtp(fullPhoneNumber,otp);
             if(result.status !== 'approved'){
                 return response(res,400,'Invalid Otp');
             }
@@ -100,3 +101,7 @@ const verifyOtp = async(req,res)=>{
 
 
 }
+
+module.exports = {
+    sendOtp,verifyOtp
+};

@@ -30,10 +30,8 @@ const verifyOtp = async (phoneNumber,otp) => {
   try {
     console.log('this is my otp ', otp);
     console.log(' this number', phoneNumber);
-    if (!phoneNumber) {
-      throw new Error('phone number is required');
-    }
-    const response = await client.verify.v2.services(serviceSid).verificationsChecks.create({
+    
+    const response = await client.verify.v2.services(serviceSid).verificationChecks.create({
       to: phoneNumber,
       code: otp,
     });
