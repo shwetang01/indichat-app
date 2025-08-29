@@ -6,12 +6,22 @@ const connectDb = require('./config/dbconnect');
 const bodyParser = require('body-parser');
 const  authRoute =require('./routes/authRoute');
 const chatRoute = require('./routes/chatRoute');
-
+const http = require('http');
+const initializeSocket = require('./services/socketService')
 
 dotenv.config();
 
 const PORT = process.env.PORT;
 const app= express();
+
+
+const corsOption ={
+  origin:process.env.FRONTEND_URL,
+  Credentials :true
+}
+
+app.use(cors(corsOption))
+
 
 // middleware
 app.use(express.json()) //parse body data

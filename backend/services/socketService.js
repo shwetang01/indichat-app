@@ -1,9 +1,10 @@
 const {Server} = require('socket.io');
 const Message = require("../models/Message");
-const { on } = require('../models/user');
+const User = require('../models/User');
 
 
 
+// map to store online users =>userId ,socketId
 const onlineUsers = new Map();
 
 // map to track the typing status-> userid ->[conversation]:boolean
@@ -17,7 +18,7 @@ const initializeSocket = (server)=>{
             methods:['GET','POST','PUT','DELETE','OPTIONS'],
 
         },
-        pingTimeout: 60000,  //disconnect inactib=ve users or sockrt after 1 min= 60 seconds
+        pingTimeout: 60000,  //disconnect inactive users or sockrt after 1 min= 60 seconds
 
     });
 
@@ -162,7 +163,7 @@ const initializeSocket = (server)=>{
 
          })
 
-        //  add or update reaction on message
+         //  add or update reaction on message
          socket.on("add_reaction",async({messageId,emoji,userId,reactionUserId})=>{
             try {
                 const message = await Message.findById(messageId);
@@ -189,15 +190,77 @@ const initializeSocket = (server)=>{
 
                 await message.save();
 
+                 const populatedMessage = await Message.findOne(message?._id)
+                .populate("sender","username profilePicture")
+                .populate("receiver","username profilePicture")
+                .populate("reactions.user","username")
+
+                const reactionUpdated ={
+                    messageId,
+                    reactions:populatedMessage.reactions
+                }
+                const senderSocket = onlineUsers.get(populatedMessage.sender._id.toString());
+                const receiverSocket = onlineUsers.get(populatedMessage.receiver?._id.toString())
+
+                if(senderSocket) io.to(senderSocket).emit("reaction_update",reactionUpdated)
+                if(receiverSocket) io.to(receiverSocket).emit("reaction_update",reactionUpdated)
+
+                                    
+
+
             } catch (error) {
-                
+                console.error("Error handling reaction",error)
             }
-         })
+        }
+        );
+      //handle disconnection and ark user offline
+
+        const handleDisconnected = async() =>{
+            if(!userId) return ;
+
+            try {
+                onlineUsers.delete(userId);
+
+                // clear all typing timeouts
+                if(typingUsers.has(userId)) {
+                    const userTyping = typingUsers.get(userId);
+                    object.keys(userTyping).forEach((key)=>{
+                        if(key.endsWith('_timeout')) clearTimeout(userTyping[key])
+                    })
+
+                    typingUsers.delete(userId)
+
+                }
+                await User.findByIdAndUpdate(userId,{
+                    isOnline:false,
+                    lastSeen:new Date(),
+                })
+
+                io.emit("user_status",{
+                    userId,isOnline :false,
+                    lastSeen: new Date(),
+                })
+
+                socket.leave('userId'),
+                console.log(`user ${userId} disconnected`)
 
 
-    });
+            } catch (error) {
+                console.error("error handling disconnection",error)
+
+            }
+
+        }
+
+        // disconnect event 
+        socket.on("disconnected",handleDisconnected)
+    });   
+    
+    // attach online usermap to socket server for external user
+    io.socketUserMap = onlineUsers;
+    return io;
+
+};
 
 
-
-
-}
+module.exports = initializeSocket;
