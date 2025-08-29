@@ -163,8 +163,37 @@ const initializeSocket = (server)=>{
          })
 
         //  add or update reaction on message
+         socket.on("add_reaction",async({messageId,emoji,userId,reactionUserId})=>{
+            try {
+                const message = await Message.findById(messageId);
+                if(!message) return;
 
-        
+                const exitingIndex = message.reactions.findIndex(
+                    (r) =>r.user.toString() === reactionUserId
+                )
+
+                if(exitingIndex >-1){
+                    const exiting = message.reactions(exitingIndex)
+                    if(exiting.emoji === emoji){
+                        // remove same reaction
+                        message.reactions.splice(exitingIndex,1)
+                    }else{
+                        // change emoji
+                        message.reactions[exitingIndex].emoji =emoji;
+                    }
+                }else{
+                    // add new reaction
+                    message.reactions.push({user:reactionUserId,emoji})
+
+                }
+
+                await message.save();
+
+            } catch (error) {
+                
+            }
+         })
+
 
     });
 
