@@ -36,9 +36,9 @@ try {
         };
 
         imageOrVideoUrl = uploadFile?.secure_url;
-        if(file.mimetype.startwith('image')){
+        if(file.mimetype.startswith('image')){
             contentType="image"
-        }else  if(file.mimetype.startwith('video')){
+        }else  if(file.mimetype.startswith('video')){
             contentType="video"
         }else{
             return response(res,400,'Unsupported file type');
@@ -53,7 +53,7 @@ try {
     const message= new Message({
         conversation:conversation?._id,
         sender:senderId,
-        receive:receiverId,
+        receiver:receiverId,
         content,
         contentType,
         imageOrVideoUrl,
@@ -93,16 +93,16 @@ exports.getConversation = async(req,res)=>{
         let conversation = await Conversation.find({
         participants: userId,
 
-    }).populate("participants","username profilePicture isonline lastSeen")
+    }).populate("participants","username profilePicture isOnline lastSeen")
     .populate({
         path:"lastMessage",
         populate:{
             path:"sender receiver",
-            select :"username profilePiture"
+            select :"username profilePicture"
 
         }
-    }).sort({updateAt :-1})
-    return response(res,500,"Conversation get successful",conversation)
+    }).sort({updatedAt :-1})
+    return response(res,201,"Conversation get successful",conversation)
     } catch (error) {
         console.error(error);
         return response(res,500,'Internal sarver error');
@@ -110,11 +110,11 @@ exports.getConversation = async(req,res)=>{
 };
 
 // get message of specific conversation 
-exports.getMessage = async(req,res) =>{
+exports.getMessages = async(req,res) =>{
     const {conversationId} =req.params;
     const userId = req.user.userId;
     try {
-        const converasation = await Conversation.findById(conversationId);
+        const conversation = await Conversation.findById(conversationId);
         if(!conversation){
             return response(res,400,"conversation not found")
         };
@@ -123,9 +123,9 @@ exports.getMessage = async(req,res) =>{
             return response(res,403,"not authorized to view this conversation")
         }
 
-        const message = await Message.find({converasation:conversationId})
+        const messages = await Message.find({conversation:conversationId})
         .populate("sender","username profilePicture")
-        .populate("receiver","userrname profilePicture")
+        .populate("receiver","username profilePicture")
         .sort("createdAt");
 
         await Message.updateMany(
@@ -138,8 +138,8 @@ exports.getMessage = async(req,res) =>{
     
         );
 
-        converasation.unreadCount = 0;
-        await converasation.save();
+        conversation.unreadCount = 0;
+        await conversation.save();
         return response(res,200,"message retrived ",messages);              
         
     } catch (error) {
@@ -180,7 +180,7 @@ exports.markAsRead = async(req,res)=>{
 
 // to delete a message 
 exports.deleteMessage = async(req,res) =>{
-    const {messageIds}= req.body;
+    const {messageId}= req.body;
     const userId = req.user.userId;
     try {
         const message = await Message.findById(messageId);

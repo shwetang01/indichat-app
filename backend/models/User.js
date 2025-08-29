@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   profilePicture:{type:String},
   username:{type:String},
   about:{type:String},
-  lastSeen:{type:Date},
+  lastSeen:{type:Date },
   isOnline:{type:Boolean, default:false},
   isVerified:{type:Boolean,default:false},
   agreed:{type:Boolean,default:false},
