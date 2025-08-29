@@ -152,18 +152,18 @@ exports.getMessages = async(req,res) =>{
 
 // mark as read api
 exports.markAsRead = async(req,res)=>{
-    const {messageIds}= req.body;
+    const {messageId}= req.body;
     const userId = req.user.userId;
 
     try {
         // get relevant messages to detrmine senders
         let messages = await Message.find({
-            _id:{$in :messageIds},
+            _id:{$in :messageId},
             receiver:userId,
         })
         
         await Message.updateMany(
-            { _id: {$in :messageIds},receiver :userId},
+            { _id: {$in :messageId},receiver :userId},
             { $set: {messageStatus:"read"}}
             
         );
@@ -175,7 +175,7 @@ exports.markAsRead = async(req,res)=>{
         return response(res,500,'Internal sarver error');
     }
 
-}
+};
 
 
 // to delete a message 
@@ -198,6 +198,6 @@ exports.deleteMessage = async(req,res) =>{
         
     } catch (error) {
         console.error(error);
-        return response(res,500,'Internal sarver error');
+        return response(res,500,'Internal server error');
     }
 };
