@@ -11,6 +11,7 @@ try {
     const file = req.file;
 
     const participants = [senderId,receiverId].sort();
+   
     // check if conversation alredy exist
     let conversation = await Conversation.findOne({
         participants:participants
@@ -73,9 +74,6 @@ try {
     .populate("sender","username profilePicture")
     .populate("receiver","username profilePicture")
 
-
-
-
     return response(res,201,"Message send successfully",populatedMessage);
 
 
@@ -86,4 +84,120 @@ try {
 }
 
 
+};
+
+// get all converasation
+exports.getConversation = async(req,res)=>{
+    const userId = req.user.userId;
+    try {
+        let conversation = await Conversation.find({
+        participants: userId,
+
+    }).populate("participants","username profilePicture isonline lastSeen")
+    .populate({
+        path:"lastMessage",
+        populate:{
+            path:"sender receiver",
+            select :"username profilePiture"
+
+        }
+    }).sort({updateAt :-1})
+    return response(res,500,"Conversation get successful",conversation)
+    } catch (error) {
+        console.error(error);
+        return response(res,500,'Internal sarver error');
+    }
+};
+
+// get message of specific conversation 
+exports.getMessage = async(req,res) =>{
+    const {conversationId} =req.params;
+    const userId = req.user.userId;
+    try {
+        const converasation = await Conversation.findById(conversationId);
+        if(!conversation){
+            return response(res,400,"conversation not found")
+        };
+
+        if(!conversation.participants.includes(userId)){
+            return response(res,403,"not authorized to view this conversation")
+        }
+
+        const message = await Message.find({converasation:conversationId})
+        .populate("sender","username profilePicture")
+        .populate("receiver","userrname profilePicture")
+        .sort("createdAt");
+
+        await Message.updateMany(
+            {
+                conversation:conversationId,
+                receiver:userId,
+                messageStatus:{$in :["send","delivered"]},
+            },
+            { $set:{messageStatus: "read"}  },
+    
+        );
+
+        converasation.unreadCount = 0;
+        await converasation.save();
+        return response(res,200,"message retrived ",messages);              
+        
+    } catch (error) {
+        console.error(error);
+        return response(res,500,'Internal sarver error');
+    }
+}
+
+
+
+// mark as read api
+exports.markAsRead = async(req,res)=>{
+    const {messageIds}= req.body;
+    const userId = req.user.userId;
+
+    try {
+        // get relevant messages to detrmine senders
+        let messages = await Message.find({
+            _id:{$in :messageIds},
+            receiver:userId,
+        })
+        
+        await Message.updateMany(
+            { _id: {$in :messageIds},receiver :userId},
+            { $set: {messageStatus:"read"}}
+            
+        );
+
+        return response(res,200,"Messages mark as read",messages)
+
+    } catch (error) {
+         console.error(error);
+        return response(res,500,'Internal sarver error');
+    }
+
+}
+
+
+// to delete a message 
+exports.deleteMessage = async(req,res) =>{
+    const {messageIds}= req.body;
+    const userId = req.user.userId;
+    try {
+        const message = await Message.findById(messageId);
+        if(!message){
+            return response(res,404 ,"Messages not found")
+
+        };
+        if(message.sender.toString() !==userId){
+            return response(res,403,"not authorized to delete this message")
+        }
+
+        await message.deleteOne();
+
+        return response(res,200,"Message deleted successfully")
+        
+    } catch (error) {
+        console.error(error);
+        return response(res,500,'Internal sarver error');
+    }
 };
