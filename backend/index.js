@@ -8,6 +8,7 @@ const  authRoute =require('./routes/authRoute');
 const chatRoute = require('./routes/chatRoute');
 const http = require('http');
 const initializeSocket = require('./services/socketService')
+const statusRoute = require("./routes/statusRoute");
 
 dotenv.config();
 
@@ -28,9 +29,23 @@ app.use(express.json()) //parse body data
 app.use(cookieParser())  //parse token of ever req
 app.use(bodyParser.urlencoded({extended:true}));
 
-
 // database connection
 connectDb();
+
+// create server
+const server = http.createServer(app)
+
+const io = initializeSocket(server)
+
+// apply socket middleware befroe routes
+app.use((req,res,next)=>{
+  req.io= io;
+  req.socketUserMap = io.socketUserMap
+  next();
+})
+
+
+
 
 // test route
 app.get("/home", (req, res) => {
@@ -40,9 +55,9 @@ app.get("/home", (req, res) => {
 
 // routes
 app.use('/api/auth',authRoute)
-
 app.use('/api/chat',chatRoute)
+app.use('/api/status',statusRoute)
 
-app.listen(PORT,()=>{
+server.listen(PORT,()=>{
     console.log(`server running in this port ${PORT}`)
 });
