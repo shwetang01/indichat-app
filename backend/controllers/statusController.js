@@ -43,8 +43,7 @@ try {
         user:userId,
         content:mediaUrl || content,
         contentType:finalContentType,
-        imageOrVideoUrl,
-        messageStatus
+        expiresAt
 
     });
 
