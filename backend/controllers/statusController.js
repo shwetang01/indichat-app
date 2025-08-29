@@ -2,29 +2,15 @@ const Status = require("../models/Status");
 const response = require('../utils/responseHandler');
 const {uploadFileToCloudinary} = require('../config/cloudinaryConfig');
 const Message = require("../models/Message");
-const { Receive } = require("twilio/lib/twiml/FaxResponse");
 
-exports.sendMessage = async(req,res) =>{
+exports.createStatus = async(req,res) =>{
 try {
-    const {senderId,receiverId,content,messageStatus} =  req.body;
+    const {content,contentType} =  req.body;
+    const userId= req.user.userId;
     const file = req.file;
 
-    const participants = [senderId,receiverId].sort();
-   
-    // check if conversation alredy exist
-    let conversation = await Conversation.findOne({
-        participants:participants
-    });
-    
-    if(!conversation){
-        conversation= new Conversation({
-            participants
-        });
-        await conversation.save();
-    }
-
-    let imageOrVideoUrl = null;
-    let contentType = null;
+    let mediaUrl = null;
+    let finalContentType = contentType || 'text';
 
     // handle file upload
     if(file){
@@ -34,46 +20,41 @@ try {
             return response(res,400,"failed to upload media");
         };
 
-        imageOrVideoUrl = uploadFile?.secure_url;
+        mediaUrl = uploadFile?.secure_url;
         if(file.mimetype.startswith('image')){
-            contentType="image"
+            finalContentType="image"
         }else  if(file.mimetype.startswith('video')){
-            contentType="video"
+            finalContentType="video"
         }else{
             return response(res,400,'Unsupported file type');
         }
     }else if(content?.trim()){
-        contentType ="text";
+        finalContentType ="text";
 
     }else{
         return response(res,400,"message content is required");
     }
+
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() +24)
     
-    const message= new Message({
-        conversation:conversation?._id,
-        sender:senderId,
-        receiver:receiverId,
-        content,
-        contentType,
+    
+    const status= new Status({
+        user:userId,
+        content:mediaUrl || content,
+        contentType:finalContentType,
         imageOrVideoUrl,
         messageStatus
 
     });
 
-    await message.save();
+    await status.save();
 
-    if(message?.content){
-      conversation.lastMessage = message?.id
+    const populatedStatus = await Message.findOne(status?._id)
+    .populate("user","username profilePicture")
+    .populate("viewers","username profilePicture")
 
-    }
-    conversation.unreadCount+=1;
-    await conversation.save();
-
-    const populatedMessage = await Message.findOne(message?._id)
-    .populate("sender","username profilePicture")
-    .populate("receiver","username profilePicture")
-
-    return response(res,201,"Message send successfully",populatedMessage);
+    return response(res,201,"Status created successfully",populatedStatus);
 
 
 } catch (error) {
@@ -81,122 +62,76 @@ try {
     return response(res,500,'Internal sarver error');
         
 }
-
-
 };
 
-// get all converasation
-exports.getConversation = async(req,res)=>{
-    const userId = req.user.userId;
+exports.getStatuses = async(req,res) =>{
     try {
-        let conversation = await Conversation.find({
-        participants: userId,
-
-    }).populate("participants","username profilePicture isOnline lastSeen")
-    .populate({
-        path:"lastMessage",
-        populate:{
-            path:"sender receiver",
-            select :"username profilePicture"
-
-        }
-    }).sort({updatedAt :-1})
-    return response(res,201,"Conversation get successful",conversation)
-    } catch (error) {
-        console.error(error);
-        return response(res,500,'Internal sarver error');
-    }
-};
-
-// get message of specific conversation 
-exports.getMessages = async(req,res) =>{
-    const {conversationId} =req.params;
-    const userId = req.user.userId;
-    try {
-        const conversation = await Conversation.findById(conversationId);
-        if(!conversation){
-            return response(res,400,"conversation not found")
-        };
-
-        if(!conversation.participants.includes(userId)){
-            return response(res,403,"not authorized to view this conversation")
-        }
-
-        const messages = await Message.find({conversation:conversationId})
-        .populate("sender","username profilePicture")
-        .populate("receiver","username profilePicture")
-        .sort("createdAt");
-
-        await Message.updateMany(
-            {
-                conversation:conversationId,
-                receiver:userId,
-                messageStatus:{$in :["send","delivered"]},
-            },
-            { $set:{messageStatus: "read"}  },
+        const statuses = await Status.find({
+            expiresAt:{$gt:new Date()}
+        }) .populate("user","username profilePicture")
+    .populate("viewers","username profilePicture").sort({createdAt: -1});
     
-        );
-
-        conversation.unreadCount = 0;
-        await conversation.save();
-        return response(res,200,"message retrived ",messages);              
+    return response(res,200,"status retrived successfully",statuses)
         
-    } catch (error) {
-        console.error(error);
-        return response(res,500,'Internal sarver error');
-    }
-}
-
-
-
-// mark as read api
-exports.markAsRead = async(req,res)=>{
-    const {messageId}= req.body;
-    const userId = req.user.userId;
-
-    try {
-        // get relevant messages to detrmine senders
-        let messages = await Message.find({
-            _id:{$in :messageId},
-            receiver:userId,
-        })
-        
-        await Message.updateMany(
-            { _id: {$in :messageId},receiver :userId},
-            { $set: {messageStatus:"read"}}
-            
-        );
-
-        return response(res,200,"Messages mark as read",messages)
-
     } catch (error) {
          console.error(error);
-        return response(res,500,'Internal sarver error');
+        return response(res,500,"Internal sarver error");
+
+    }
+};
+
+exports.viewStatus = async(req,res) =>{
+    const {statusId} = req.params;
+    const userId =req.user.userId;
+
+    try {
+        const status =await Status.findById(statusId);
+        if(!status){
+            return response(res,404,"Status not found")
+        }
+        if(!status.viewers.includes(userId)){
+            status.viewers.push(userId);
+            await status.save();
+
+            const updateStatus = await Status.findById(statusId)
+            .populate("user","username profilePicture")
+            .populate("viewers","username profilePicture").sort({createdAt: -1});
+
+
+        }else{
+            console.log('user already viewed the status')
+        }   
+
+        return response(res,200,'status viewed successfully')
+
+    } catch (error) {
+        console.error(error);
+        return response(res,500,"Internal sarver error");
     }
 
 };
 
+exports.deleteStatus = async(req,res) =>{
+     const {statusId} = req.params;
+    const userId =req.user.userId;
 
-// to delete a message 
-exports.deleteMessage = async(req,res) =>{
-    const {messageId}= req.body;
-    const userId = req.user.userId;
     try {
-        const message = await Message.findById(messageId);
-        if(!message){
-            return response(res,404 ,"Messages not found")
-
-        };
-        if(message.sender.toString() !==userId){
-            return response(res,403,"not authorized to delete this message")
+        const status = await Status.findById(statusId);
+        if(!status){
+            return response(res,404,"status not found");
+        }
+        if(status.user.toString() !== userId){
+             return response(res,403,"not authorized to delete this status")
         }
 
-        await message.deleteOne();
 
-        return response(res,200,"Message deleted successfully")
-        
+        await status.deleteOne();
+
+        return response(res,200,"status deleted successfully")
+
     } catch (error) {
         console.error(error);
-        return response(res,500,'Internal server error');
+     return response(res,500,"Internal sarver error");
     }
+
 };
