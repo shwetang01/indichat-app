@@ -103,7 +103,69 @@ const initializeSocket = (server)=>{
             }
         })
         // handle typing start eventv and auto-stop after 3 sec
-         
+         socket.on("typing_start",({conversationId,receiverId})=>{
+            if(!userId || !conversationId || !receiverId) return;
+
+            if(!typingUsers.has(userId)) typingUsers.set(userId,{});
+            const userTyping = typingUsers.get(userId)
+
+            userTyping[conversationId]= true;
+
+            // clear any exiting timeout
+            if(userTyping[`${conversationId}_timeout`]){
+                clearTimeout(userTyping[`${conversationId}_timeout`])
+            }
+
+            // auto stop after 3 sec
+            userTyping[`${conversationId}_timeout`]= setTimeout(()=>{
+                userTyping[conversationId] = false;
+                socket.to(receiverId).emit("user_typing",{
+                    userId,
+                    conversationId,
+                    isTyping : false
+                })
+            },3000)
+
+            // notify sreceiver 
+            socket.to(receiverId).emit("user_typing", {
+                userId,
+                conversationId,
+                isTyping :true
+            })
+
+
+
+
+         })
+
+         socket.on("typing_stop",({connectingUserId,receiverId})=>{
+             if(!userId || !conversationId || !receiverId) return;
+
+            if(!typingUsers.has(userId)) {
+                const userTyping = typingUsers.get(userId);
+                userTyping[conversationId] = false;
+               
+                if( userTyping[`${conversationId}_timeout`]){
+                   clearTimeout( userTyping[`${conversationId}_timeout`])
+                   delete userTyping[`${conversationId}_timeout`] 
+
+                }
+
+            };
+
+            socket.to(receiverId).emit("user_typing",{
+                userId,
+                conversationId,
+                isTyping:false
+            })
+
+
+         })
+
+        //  add or update reaction on message
+
+        
+
     });
 
 
