@@ -65,7 +65,8 @@ const Login = () => {
   const navigate = useNavigate();
   const {setUser} = useUserStore();
   const {theme,setsTheme} = useThemeStore();
-
+  const [showDropdown,setShowDropDown] = useState(false);
+  const [searchterm,setSearchTerm]= useState("")
 
   const {
     register:loginRegister,
@@ -73,7 +74,10 @@ const Login = () => {
     formState:{errors:loginErrors }
   } = useForm({
     resolver:yupResolver(loginValidationSchema)
-  })
+  });
+  const filterCountries = countries.filter(
+    (country) => country.name.toLowerCase().includes(searchterm.toLowerCase()) || country.dialCode.includes(searchterm)
+  )
 
   const {
     handleSubmit: handleOtpSubmit,
@@ -108,7 +112,7 @@ const Login = () => {
     <motion.div initial ={{opacity:0,y:-50}}
     animate={{opacity:1,y:0}}
     transition={{duration:0.5}}
-    className={`${theme === 'dark' ? "bg-gray-800 text-white": "bg-white"} p-6 md:p-8 rounded-lg shadow-2xlw-full max-w-md relative z-10`}>
+    className={`${theme === 'dark' ? "bg-gray-800 text-white": "bg-white"} p-6 md:p-8 rounded-lg shadow-2xl w-full max-w-md relative z-10`}>
 
         <motion.div initial ={{scale:0}}
         animate={{scale:1,}}
@@ -130,9 +134,11 @@ const Login = () => {
       <ProgressBar/>
       {error && <p className='text-red-500 text-center mb-4'>{error}</p>}
 
+      {step === 1 && }
+
     </motion.div> 
 
-
+    
 
 
    </div>
