@@ -90,7 +90,16 @@ const Login = () => {
    watch
   } = useForm({
     resolver:yupResolver(profileValidationSchema)
-  })
+  });
+
+  const ProgressBar = ()=>(
+    <div className={`w-full ${theme === 'dark' ? "bg-gray-700" :"bg-gray-200"} rounded-full h-2.5 mb-6`}>
+      <div className="bg-green-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" 
+      style={{width:`${(step/3)*100}%`}}
+
+      />
+    </div>
+  )
   
   
   return (
@@ -99,7 +108,7 @@ const Login = () => {
     <motion.div initial ={{opacity:0,y:-50}}
     animate={{opacity:1,y:0}}
     transition={{duration:0.5}}
-    className={`${theme === 'dark' ? "bg-gray-800 text-white": "bg-white"} p-6 md:p-8 rounded-lg shadow-2xl w-full max-w-md relative z-10`}>
+    className={`${theme === 'dark' ? "bg-gray-800 text-white": "bg-white"} p-6 md:p-8 rounded-lg shadow-2xlw-full max-w-md relative z-10`}>
 
         <motion.div initial ={{scale:0}}
         animate={{scale:1,}}
@@ -114,7 +123,12 @@ const Login = () => {
       <h1 className={`text-3xl font-bold text-center mb-6 ${theme ==="dark" ? "text-white":"text-gray-800" }`}>
       Login to Connect
       </h1>
+       <h5 className={`text-1xl font-bold text-center mb-6 ${theme ==="dark" ? "text-white":"text-gray-800" }`}>
+       Desi roots,Global reach
+      </h5>
 
+      <ProgressBar/>
+      {error && <p className='text-red-500 text-center mb-4'>{error}</p>}
 
     </motion.div> 
 
