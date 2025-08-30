@@ -49,9 +49,19 @@ try {
 
     await status.save();
 
-    const populatedStatus = await Message.findOne(status?._id)
+    const populatedStatus = await Status.findOne(status?._id)
     .populate("user","username profilePicture")
     .populate("viewers","username profilePicture")
+
+    // emit socket event
+    if(req.io && req.socketUserMap){
+        // broadcast to all conncting user excpect the creater
+        for(const[connectedUserId,socketId] of req.socketUserMap){
+            if(connectedUserId !== userId){
+                req.io.to(socketId).emit("new_status",populatedStatus)
+            }
+        }
+    }
 
     return response(res,201,"Status created successfully",populatedStatus);
 
@@ -94,8 +104,26 @@ exports.viewStatus = async(req,res) =>{
 
             const updateStatus = await Status.findById(statusId)
             .populate("user","username profilePicture")
-            .populate("viewers","username profilePicture").sort({createdAt: -1});
+            .populate("viewers","username profilePicture");
 
+             // emit socket event
+            if(req.io && req.socketUserMap){
+                // broadcast to all conncting user excpect the creater
+               const statusOwnerSocketId = req.socketUserMap.get(status.user._id.toString())
+               if(statusOwnerSocketId){
+                const viewData = {
+                    statusId,
+                    viewerId:userId,
+                    totalViewers:updateStatus.viewers.length,
+                    viewers:updateStatus.viewers
+                }
+                req.io.to(statusOwnerSocketId).emit("status_viewed",viewData)
+
+               }else{
+                    console.log('status owner not connected')
+
+               }
+            }
 
         }else{
             console.log('user already viewed the status')
@@ -125,6 +153,16 @@ exports.deleteStatus = async(req,res) =>{
 
 
         await status.deleteOne();
+
+         // emit socket event
+            if(req.io && req.socketUserMap){
+                for(const[connectedUserId,socketId] of req.socketUserMap){
+            if(connectedUserId !== userId){
+                req.io.to(socketId).emit("status_deleted",statusId)
+            }
+           }
+
+            }
 
         return response(res,200,"status deleted successfully")
 
