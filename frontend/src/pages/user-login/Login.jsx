@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import useThemeStore from '../../store/themeStore';
 import {useNavigate} from "react-router-dom";
 import useUserStore from '../../store/useUserStore';
+import {motion, spring} from 'framer-motion';
 
 
 // validation schema
@@ -52,7 +53,7 @@ const loginValidationSchema = yup
 
 
 const Login = () => {
-  const {step,setStep, userPhoneData,setUserPhoneData ,resetLoginState} = useLoginStore
+  const {step,setStep, userPhoneData,setUserPhoneData ,resetLoginState} = useLoginStore();
   const [phoneNumber,setPhoneNumber] = useState("");
   const [selectCountry,setSelectCountry] = useState(countries[0]);
   const [otp,setOtp] = useState([ "", "", "", "", "", ""])
@@ -79,7 +80,7 @@ const Login = () => {
     formState:{errors:otpErrors },
     setValue:setOtpValue
   } = useForm({
-    resolver:yupResolver(loginValidationSchema)
+    resolver:yupResolver(otpValidationSchema)
   })
 
    const {
@@ -95,6 +96,31 @@ const Login = () => {
   return (
     <div className={`min-h-screen ${ theme ==='dark' ?"bg-gray-900" : "bg-gradient-to-br from-green-400 to-blue-500 " } flex items-center justify-center p-4 overflow-hidden `}>
    
+    <motion.div initial ={{opacity:0,y:-50}}
+    animate={{opacity:1,y:0}}
+    transition={{duration:0.5}}
+    className={`${theme === 'dark' ? "bg-gray-800 text-white": "bg-white"} p-6 md:p-8 rounded-lg shadow-2xl w-full max-w-md relative z-10`}>
+
+        <motion.div initial ={{scale:0}}
+        animate={{scale:1,}}
+        transition={{duration:0.2,type :'spring', stiffness:260 ,damping:20}}
+        // className="w-24 h-24 bg-yellow-500 rounded-full mx-auto mb-6 flex items-center justify-center" 
+        className="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center bg-white shadow-lg"      >
+      
+        <img src="/chat.png" alt="logo" className="src" />
+
+      </motion.div>
+      
+      <h1 className={`text-3xl font-bold text-center mb-6 ${theme ==="dark" ? "text-white":"text-gray-800" }`}>
+      Login to Connect
+      </h1>
+
+
+    </motion.div> 
+
+
+
+
    </div>
   )
 };
