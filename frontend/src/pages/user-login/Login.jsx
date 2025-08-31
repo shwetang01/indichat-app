@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import useUserStore from "../../store/useUserStore";
 import { motion, spring } from "framer-motion";
 // Using react-icons
-import { FaChevronDown } from "react-icons/fa";
+import { FaArrowLeft, FaChevronDown } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import Spinner from "../../utils/Spinner";
 import { toast, ToastContainer } from 'react-toastify';
@@ -199,6 +199,15 @@ const Login = () => {
     
   }
 
+const handleOtpChange = (index,value)=>{
+  const newOtp={...otp};
+  newOtp[index]= value;
+  setOtp(newOtp);
+  setOtpValue("otp",newOtp.join(""));
+  if(value && index<5){
+    document.getElementById(`otp-${index +1}`).focus();
+  }
+}
 
 
 
@@ -233,6 +242,14 @@ const Login = () => {
       />
     </div>
   );
+
+  const handleBack =()=>{
+    setStep(1);
+    setUserPhoneData(null);
+    setOtp(["","","","","",""]);
+    setError("");
+  }
+
 
   return (
     <div
@@ -284,7 +301,7 @@ const Login = () => {
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
         {step === 1 && (
-          <form className="spacce -y-4">
+          <form className="spacce -y-4" onSubmit={handleLoginSubmit(onLoginSubmit)}>
             <p
               className={`text-center ${
                 theme === "dark" ? "text-gray-300" : "text-gray-600"
@@ -419,13 +436,15 @@ const Login = () => {
                   : "bg-white border-gray-300"
               }`}
               >
+                 <FaUser className="mr-2"/>
                <input
                   type="email"
                   {...loginRegister("email")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder= "email(optional)"
-                  className={`ww-full bg-transparent  ${
+                 
+                  className={`w-full bg-transparent  ${
                     theme === "dark"
                       ? " text-white"
                       : "text-black"
@@ -456,6 +475,60 @@ const Login = () => {
             
           </form>
         )}
+
+        {step === 2 && (
+          <form onSubmit={handleOtpSubmit(onOtpSubmit)} className="space-y-4">
+            <p className= {`text-center ${theme === 'dark' ?"text-gray-300" :"text-gray-600"} mb-4`}>
+              Please enter 6-digit OTP send to your {userPhoneData?userPhoneData.phoneSuffix:"Email"}{" "}
+              {userPhoneData.phoneNumber && userPhoneData?.phoneNumber}
+            </p>
+            <div className="flex justify-between">
+            {otp.map((digit,index)=>{
+              <input 
+              ket = {index}
+              id={`otp-${index}`}
+              type="text"
+              maxLength={1}
+              value={digit}
+              onChange={(e)=>handleOtpChange(index,e.target.value)}
+              className={`w-12 h-12 text-center border ${theme ==='dark'?"bg-gray-700 border-gray-600 text-white":"bg-white border-gray-300"}rounded-md focus:ring-2 focus:outline-none focus:ring-green-500 ${otpErrors.otp ?"border-red-500":""
+
+              }`} />
+            })}
+
+            {otpErrors.otp && (
+                <p className="text-red-500 text-sm">
+                  {otpErrors.otp.message}
+                </p>
+              )
+            }  
+
+             <button 
+             type="submit" 
+             className="bg-green-500 w-full py-2 hover:bg-green-600 mt-2
+             border rounded-md transition text-white "
+             
+             >
+              {loading ? <Spinner/> :"Verify OTP"}
+            </button >  
+
+            <button  type="button"
+            onClick={handleBack}
+            className={`w-full mt-2 ${theme=== 'dark'? "bg-gray-700 text-gray-300 " :"bg-gray-200 text-gray-700"} phy-2 rounded-md hover:bg-gray-300 transition flex items-center justify-center`}            
+            >
+              <FaArrowLeft className="mr-2"/>
+              wrong number? Go Back
+              
+              </button>     
+
+
+
+            </div>
+
+
+          </form>
+        )}
+
       </motion.div>
     </div>
   );
