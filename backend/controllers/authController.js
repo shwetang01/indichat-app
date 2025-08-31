@@ -161,7 +161,7 @@ const logout= (req,res) =>{
         return response(res,200,'user logout successfully')
     } catch (error) {
          console.error(error);
-        return response(res,500,'Internal sarver error');
+        return response(res,500,'Internal server error');
     }
 }
 
