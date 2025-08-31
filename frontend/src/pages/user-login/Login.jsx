@@ -10,7 +10,10 @@ import useUserStore from "../../store/useUserStore";
 import { motion, spring } from "framer-motion";
 // Using react-icons
 import { FaChevronDown } from "react-icons/fa";
-import Spinner from "../../utils/Spinner"
+import { FaUser } from "react-icons/fa";
+import Spinner from "../../utils/Spinner";
+import { toast, ToastContainer } from 'react-toastify';
+import { sendOtp, updateUserProfile, verifyOtp } from "../../services/user.service";
 
 // validation schema
 const loginValidationSchema = yup
@@ -95,6 +98,111 @@ const Login = () => {
       country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       country.dialCode.includes(searchTerm)
   );
+
+  const onLoginSubmit= async ()=>{
+    try {
+      setLoading(true);
+      if(email){
+        const response = await sendOtp(null,null,email);
+        if(response.status === 'success'){
+          toast.info("OTP send to your email");
+          setUserPhoneData({email});
+          setStep(2)
+        }
+      }else{
+          const response = await sendOtp(phoneNumber,selectCountry.dialCode);
+          if(response.status === 'success'){
+            toast.info("OTP is send to phone number");
+            setUserPhoneData({phoneNumber,phoneSuffix:selectCountry.dialCode});
+            setStep(2)
+
+          }
+
+      }
+      
+    } catch (error) {
+      console.log(error);
+      setError(error.message ||"Failed to send OTP")
+    }finally{
+      setLoading (false)
+    }
+  }
+
+  const onOtpSubmit = async()=>{
+    try {
+      setLoading(true);
+      if(!userPhoneData){
+        throw new Error("phone or email data is missing")
+      };
+      const otpString =otp.join("");
+      let response;
+      if(userPhoneData?.email){
+        response=await verifyOtp(null,null,otpString,userPhoneData.email)
+      }else{
+        response= await verifyOtp(userPhoneData.phoneNumber,userPhoneData.phoneSuffix,otpString)
+      }
+      if(response.status === 'success'){
+        toast.success("Otp verify successfully")
+        const user = response.data?.user;
+        if(user?.username && user?.profilePicture){
+          setUser(user);
+          toast.success("Welcome back to Indichat");
+          navigate('/');
+          resetLoginState();
+        }
+        else{
+          setStep(3);
+
+        }
+      }
+
+    } catch (error) {
+      console.log(error);
+      setError(error.message ||"Failed to verify OTP")
+    }finally{
+      setLoading (false)
+    }
+      
+  }
+
+  const handleChange =(e)=>{
+    const file = e.target.files[0];
+    if(file){
+      setProfilePictureFile(file);
+      setProfilePicture(URL.createObjectURL(file));
+    }
+  }
+
+  const onProfileSubmit = async(data)=>{
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("username",data.username)
+      formData.append("agreed",data.agreed)
+      if(profilePictureFile){
+        formData.append("media",profilePictureFile)
+
+      }else{
+        formData.append("profilePicture",selectAvatar)
+      }
+      await updateUserProfile(formData);
+      toast.success("welcome back to Indichat");
+      navigate('/')
+      resetLoginState();      
+
+    } catch (error) {
+      console.log(error);
+      setError(error.message ||"Failed to update user profile")
+    }finally{
+      setLoading (false)
+    }
+    
+  }
+
+
+
+
+
 
   const {
     handleSubmit: handleOtpSubmit,
@@ -229,7 +337,7 @@ const Login = () => {
                         />
                       </div>
 
-                      {filterCountries.map((country) => (
+                      {/* {filterCountries.map((country) => (
                         <button
                           key={country.alpha2}
                           type="button"
@@ -245,9 +353,9 @@ const Login = () => {
                         >
                           {country.flag} ({country.dialCode}) {country.name}
                         </button>
-                      ))}
+                      ))} */}
 
-                      {/* {filterCountries.map((country) => (
+                      {filterCountries.map((country) => (
             <div
               key={country.alpha2}
               onClick={()=>{
@@ -270,7 +378,7 @@ const Login = () => {
               />
               {country.dialCode} {country.name}
             </div>
-          ))} */}
+          ))}
                     </div>
                   )}
                 </div>
@@ -314,10 +422,10 @@ const Login = () => {
                <input
                   type="email"
                   {...loginRegister("email")}
-                  value={phoneNumber}
+                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email(optional)"
-                  className={`w-w-full bg-transparent  ${
+                  placeholder= "email(optional)"
+                  className={`ww-full bg-transparent  ${
                     theme === "dark"
                       ? " text-white"
                       : "text-black"
@@ -339,10 +447,11 @@ const Login = () => {
 
             <button 
              type="submit" 
-             className="bg-green-500 w-full py-2 hover:bg-green-600 transition text-white "
+             className="bg-green-500 w-full py-2 hover:bg-green-600 mt-2
+             border rounded-md transition text-white "
              
              >
-              {loading ?<Spinner/> :"Send OTP"}
+              {loading ? <Spinner/> :"Send OTP"}
             </button >
             
           </form>
