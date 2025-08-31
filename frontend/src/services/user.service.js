@@ -14,7 +14,7 @@ export const sendOtp = async(phoneNumber,phoneSuffix,email) =>{
 
 export const verifyOtp = async(phoneNumber,phoneSuffix,otp,email) =>{
     try {
-        const response = await axiosInstance.post('/auth/verify-otp',{phoneNumber,phoneSuffix,email});
+        const response = await axiosInstance.post('/auth/verify-otp',{phoneNumber,phoneSuffix,email,otp});
         return response.data;
         
     } catch (error) {
