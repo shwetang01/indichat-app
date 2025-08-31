@@ -18,10 +18,10 @@ const app= express();
 
 const corsOption ={
   origin:process.env.FRONTEND_URL,
-  Credentials :true
+  credentials :true
 }
 
-app.use(cors(corsOption))
+app.use(cors(corsOption));
 
 
 // middleware
@@ -43,14 +43,6 @@ app.use((req,res,next)=>{
   req.socketUserMap = io.socketUserMap
   next();
 })
-
-
-
-
-// test route
-app.get("/home", (req, res) => {
-  res.send("Server is running ✅");
-});
 
 
 // routes

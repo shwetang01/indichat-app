@@ -496,6 +496,8 @@ const handleOtpChange = (index,value)=>{
               }`} />
             })}
 
+            </div>
+            
             {otpErrors.otp && (
                 <p className="text-red-500 text-sm">
                   {otpErrors.otp.message}
@@ -519,12 +521,7 @@ const handleOtpChange = (index,value)=>{
               <FaArrowLeft className="mr-2"/>
               wrong number? Go Back
               
-              </button>     
-
-
-
-            </div>
-
+              </button>  
 
           </form>
         )}
