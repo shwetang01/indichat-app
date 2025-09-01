@@ -11,12 +11,9 @@ const useThemeStore = create(
 
         }),
         {
-            name: "login-storage",
-            partialize :(state) =>({
-                step:state.step,
-                userPhoneData : state.userPhoneData,
+            name: "theme-storage",
+            getStorege: ()=> localStorage
 
-            })
         }
 
     )
