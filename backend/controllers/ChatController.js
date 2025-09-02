@@ -64,7 +64,7 @@ try {
     await message.save();
 
     if(message?.content){
-      conversation.lastMessage = message?.id
+      conversation.lastMessage = message?._id;
 
     }
     conversation.unreadCount+=1;

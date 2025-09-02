@@ -22,7 +22,7 @@ const ChatList = ({ contacts }) => {
 
   return (
     <div
-      className={`w-full bordert-r h-screen ${
+      className={`w-full border-r h-screen ${
         theme === "dark"
           ? "bg-[rgb(17,27,33)] border-gray-600"
           : "bg-white border-gray-200"
@@ -48,7 +48,7 @@ const ChatList = ({ contacts }) => {
           <input
             type="text"
             placeholder="search or start new chat"
-            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline:none focus:ring-2 focus:ring-blue-500
+            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
             ${
               theme === "dark"
                 ? "bg-gray-800 text-white border-gray-700 placeholder-gray-500"
@@ -65,7 +65,7 @@ const ChatList = ({ contacts }) => {
           <motion.div
             key={contact._id}
             onClick={() => setSelectedContact(contact)}
-            className={`p-3 flex items-center sursor-pointer ${
+            className={`p-3 flex items-center cursor-pointer ${
               theme === "dark"
                 ? selectedContact?._id === contact?._id
                   ? "bg-gray-700"
@@ -95,10 +95,23 @@ const ChatList = ({ contacts }) => {
                     className={`text-xs ${
                       theme === "dark" ? "text-gray-400" : "text-gray-500"
                     }`}>
-                    {formatTimestamp(contact?.conversation.lastMessage?.createdAt)}
+                    {formatTimestamp(contact?.conversation?.lastMessage?.createdAt)}
                   </span>
                 )}
               </div>
+                <div className="flex justify-between items-baseline">
+                  <p className={`text-sm ${theme ==='dark'?"text-gray-400":"text-gray-500"} truncate`} >
+                    {contact?.conversation?.lastMessage?.content}
+
+                  </p>
+                  {contact?.conversation && contact?.conversation?.unreadCount > 0 && contact?.conversation?.lastMessage?.receiver === user?._id && (
+                    <p className={`text-sm font-semibold w-6 h-6 flex items-center justify-center bg-yellow-500 ${theme ==='dark'?"text-gray-800":"text-gray-500"} rounded-full`}>
+                      {contact?.conversation?.unreadCount}
+                    </p>
+                  ) }
+
+                </div>
+
             </div>
           </motion.div>
         ))}
