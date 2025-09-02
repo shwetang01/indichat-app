@@ -112,7 +112,8 @@ exports.getConversation = async(req,res)=>{
             select :"username profilePicture"
 
         }
-    }).sort({updatedAt :-1})
+    }).sort({updatedAt :-1});
+    
     return response(res,201,"Conversation get successful",conversation)
     } catch (error) {
         console.error(error);

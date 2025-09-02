@@ -170,16 +170,16 @@ const getAllUsers= async (req,res) =>{
     const loggedInUser = req.user.userId;
     try {
         const users= await User.find({_id:{$ne:loggedInUser}}).select(
-            "username profilePicture lastSeen isOnline about "
+            "username profilePicture lastSeen isOnline about phoneNumber PhoneSuffix "
         ).lean();
 
         const usersWithConversation = await Promise.all(
-            users.map(async (user)=>{
+            users.map(async (user)=> {
                 const conversation = await Conversation.findOne({
                     participants:{$all:[loggedInUser,user?._id]}
                 }).populate({
                     path:"lastMessage",
-                    select :'content createdAt sender receiver'
+                    select : 'content createdAt sender receiver'
                 }).lean();
 
                 return {
@@ -189,6 +189,8 @@ const getAllUsers= async (req,res) =>{
 
             })
         );
+        console.log(usersWithConversation)
+
         return response(res,200,'users retrive successfully',usersWithConversation);
     } catch (error) {
          console.error(error);
