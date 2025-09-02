@@ -11,6 +11,7 @@ const Layout = ({children,isThemeDialogOpen,toggleThemeDialog,isStatusPreviewOpe
 
   const selectedContact =useLayoutStore(state =>state.selectedContact);
   const setSelectedContact =useLayoutStore(state =>state.setSelectedContact);
+  
   const location = useLocation();
   const [isMobile,setIsMobile] = useState(window.innerWidth <768)
   const {theme,setTheme} = useThemeStore();

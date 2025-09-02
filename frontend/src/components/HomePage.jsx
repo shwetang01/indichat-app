@@ -7,10 +7,10 @@ import useLayoutStore from '../store/layoutStore';
 
 const HomePage = () => {
 
-  const setSelectedContact =useLayoutStore(state =>state.setSelectedContact);
+  const setSelectedContact =useLayoutStore( (state) =>state.setSelectedContact);
   // const location = useLocation();
   const [allUsers,setAllUsers]=useState([]);
-  const getUser = async ()=>{
+  const getAllUser = async()=>{
     try {
       const result= await getAllUsers();
       if(result.status === 'success'){
@@ -23,7 +23,7 @@ const HomePage = () => {
   }
 
   useEffect(()=> {
-    getAllUsers();
+    getAllUser();
 
   },[]) 
   console.log(allUsers);
