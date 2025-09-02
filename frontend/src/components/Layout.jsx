@@ -13,7 +13,7 @@ const Layout = ({children,isThemeDialogOpen,toggleThemeDialog,isStatusPreviewOpe
   const setSelectedContact =useLayoutStore(state =>state.setSelectedContact);
   
   const location = useLocation();
-  const [isMobile,setIsMobile] = useState(window.innerWidth <768)
+  const [isMobile,setIsMobile] = useState(window.innerWidth <768);
   const {theme,setTheme} = useThemeStore();
 
   useEffect(()=>{
@@ -26,9 +26,9 @@ const Layout = ({children,isThemeDialogOpen,toggleThemeDialog,isStatusPreviewOpe
   },[])
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ?"bg-[#111b21] text-white ":"bg-gray-100 text-black"}flex relative`}>
+    <div className={`min-h-screen ${theme === 'dark' ?"bg-[#111b21] text-white ":"bg-gray-100 text-black"} flex relative`}>
       {!isMobile && <Sidebar/>}
-      <div className={`flex-1 flex overflow-hidden ${isMobile ?"flex-col":""}`}>
+      <div className={`flex-1 flex overflow-hidden ${isMobile ? "flex-col":""}`}>
 
         <AnimatePresence>
         {(!selectedContact || !isMobile)  && (
@@ -86,7 +86,7 @@ const Layout = ({children,isThemeDialogOpen,toggleThemeDialog,isStatusPreviewOpe
                   value='light'
                   checked ={theme === 'light'}
                   onChange={()=>setTheme("light")}
-                  className='from-radio text-blue-600 '
+                  className='form-radio text-blue-600 '
                 
                 />
 
@@ -100,7 +100,7 @@ const Layout = ({children,isThemeDialogOpen,toggleThemeDialog,isStatusPreviewOpe
                   value='light'
                   checked ={theme === 'dark'}
                   onChange={()=>setTheme("dark")}
-                  className='from-radio text-blue-600 '
+                  className='form-radio text-blue-600 '
                 
                 />
                 <span> Dark </span>
@@ -108,7 +108,7 @@ const Layout = ({children,isThemeDialogOpen,toggleThemeDialog,isStatusPreviewOpe
             </div>
             <button 
              onClick={toggleThemeDialog}
-             className='mt-6-w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-200'
+             className='mt-6 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-200'
             >
               Close
             </button>
