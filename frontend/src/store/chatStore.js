@@ -169,7 +169,8 @@ export const useChatStore = create((set,get)=>({
             })
 
             // mark unread as read
-
+            const {markMessagesAsRead} = get();
+            markMessagesAsRead();
 
             return messageArray;
 
@@ -199,7 +200,16 @@ export const useChatStore = create((set,get)=>({
                 messages :[...state.messages,message]
 
             }));
+
+            // automatically mark as read
+            if(message.receiver?._id === currentUser?._id){
+                get().markMessagesAsRead();
+            }
+
         }
+
+
+
 
         //update conversation preview and unread count
         set((state)=>{
@@ -297,6 +307,64 @@ export const useChatStore = create((set,get)=>({
             })
         }
     },
+
+    startTyping :(receiverId) =>{
+        const {currentConversation} = get();
+        const socket = getSocket();
+        if(socket && currentConversation && receiverId){
+            socket.emit("typing_start",{
+                conversationId: currentConversation,
+                receiverId
+            })
+        }
+    },
+
+     stopTyping :(receiverId) =>{
+        const {currentConversation} = get();
+        const socket = getSocket();
+        if(socket && currentConversation && receiverId){
+            socket.emit("typing_stop",{
+                conversationId: currentConversation,
+                receiverId
+            })
+        }
+    },
+
+    isUserTyping: (userId) =>{
+        const {typingUsers,currentConversation}= get();
+        if(!currentConversation || !typingUsers.has(currentConversation) || !userId){
+            return false;
+        }
+        return typingUsers.get(currentConversation).has(userId)
+    },
+
+    isUserOnline: (userId) =>{
+        if(!userId) return null;
+        const {onlineUsers} = get();
+        return onlineUsers.get(userId)?.isOnline || false;
+
+    },
+
+    getUserLastSeen: (userId) =>{
+        if(!userId) return null;
+        const {onlineUsers} = get();
+        return onlineUsers.get(userId)?.lastSeen || null;
+
+    },
+    
+
+    cleanup :()=>{
+        set({
+            conversation: [],
+            currentConversation: null,
+            messages: [],
+            onlineUsers: new Map(),
+            typingUsers: new Map(),
+
+        })
+
+    },
+
 
     
 
