@@ -1,5 +1,5 @@
 import './App.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {BrowserRouter as Router ,Routes,Route} from 'react-router-dom'
 import Login from './pages/user-login/Login';
 import { ToastContainer} from 'react-toastify';
@@ -9,9 +9,25 @@ import HomePage from './components/HomePage';
 import UserDetails from './components/UserDetails';
 import Setting from './pages/SettingSection/Setting'
 import Status from './pages/StatusSection/Status';
+import useUserStore from './store/useUserStore';
+import { disconnectSocket, initializeSocket } from './services/chat.service';
 
 
 function App() {
+  const {user} = useUserStore();
+  
+  useEffect(()=>{
+    if(user?._id){
+      const socket = initializeSocket();
+    }
+
+    return ()=>{
+      disconnectSocket();
+    }
+
+  },[user])
+
+
   return (
     <>
     <ToastContainer position='top-right' autoClose={3000}/>
