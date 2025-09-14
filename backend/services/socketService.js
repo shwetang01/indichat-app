@@ -139,7 +139,7 @@ const initializeSocket = (server)=>{
 
          })
 
-         socket.on("typing_stop",({connectingUserId,receiverId})=>{
+         socket.on("typing_stop",({conversationId,receiverId})=>{
              if(!userId || !conversationId || !receiverId) return;
 
             if(!typingUsers.has(userId)) {

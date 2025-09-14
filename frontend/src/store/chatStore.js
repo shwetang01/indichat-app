@@ -4,6 +4,7 @@ import axiosInstance from "../services/url.service";
 
 
 export const useChatStore = create((set,get)=>({
+    
     conversations :[],
     currentConversation : null,
     messages: [],
@@ -18,7 +19,7 @@ export const useChatStore = create((set,get)=>({
         const socket = getSocket();
         if(!socket) return ;
 
-        // remove exiting listeners to prevent duplicatw handlers
+        // remove exiting listeners to prevent duplicate handlers
         socket.off("receive_message");
         socket.off("user_typing");
         socket.off("user_status");
@@ -33,7 +34,7 @@ export const useChatStore = create((set,get)=>({
         });
 
         // confirm message delivery
-        socket.on("message_send",(message) =>{
+        socket.on("send_message",(message) =>{
             set((state)=>({
                 messages: state.messages.map((msg)=>
                 msg._id === message._id?{...msg} :msg )

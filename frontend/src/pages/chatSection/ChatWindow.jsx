@@ -12,12 +12,13 @@ import {
   FaTimes,
   FaFile,
   FaVideo,
+  FaPaperPlane,
+  FaEllipsisV,
 } from "react-icons/fa";
 import useLayoutStore from "../../store/layoutStore";
 import { object } from "yup";
 import MessageBubble from "./MessageBubble";
 import EmojiPicker from "emoji-picker-react";
-
 
 const isValidate = (date) => {
   return date instanceof Date && !isNaN(date);
@@ -279,8 +280,12 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
 
         <div className="flex items-center space-x-4">
           <button className="focus:outline-none">
-            <FaVideo className="h-5w-5" />
+            <FaVideo className="h-5 w-5" />
           </button>
+          <button className="focus:outline-none">
+            <FaEllipsisV className ="h-5 w-5" />
+          </button>
+
         </div>
       </div>
 
@@ -332,7 +337,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
       <div
         className={`p-4 ${
           theme === "dark" ? "bg-[#303430]" : "bg-white"
-        }flex items-center space-x-2 relative`}
+        } flex items-center space-x-2 relative`}
       >
         <button
           className="focus:outline-none"
@@ -350,7 +355,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
             <EmojiPicker
               onEmojiClick={(emojiObject) => {
                 setMessage((prev) => prev + emojiObject.emoji);
-                setshowEmojiPicker(false);
+                setshowEmojiPicker(false)
               }}
               theme={theme}
             />
@@ -385,7 +390,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
 
               <button
                 onClick={() => fileInputRef.current.click()}
-                className={`flex items-center px-4 w-full transition-color  ${
+                className={`flex items-center px-4 py-2 w-full transition-colors  ${
                   theme === "dark" ? "hover: bg-gray-500" : "hover:bg-gray-100"
                 }`}
               >
@@ -400,10 +405,33 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
               >
                 <FaFile className="mr-2" /> Documents
               </button>
-              
             </div>
           )}
         </div>
+
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              handleSendMessage();
+            }
+          }}
+          placeholder="Type a message"
+          className={`flex-grow px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500
+              ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "bg-blue-50 text-black border-gray-300"
+              } `}
+        />
+        <button onClick={handleSendMessage} className="focus:outline-none">
+              <FaPaperPlane  className="h-6 w-6 text-blue-500" />
+
+        </button>
+
+
       </div>
     </div>
   );
