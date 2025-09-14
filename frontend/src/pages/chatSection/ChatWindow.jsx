@@ -2,6 +2,9 @@ import React, {  useEffect, useRef, useState } from "react";
 import useThemeStore from "../../store/themeStore";
 import useUserStore from "../../store/useUserStore";
 import { useChatStore } from "../../store/chatStore";
+import {isToday,isYesterday,format } from 'date-fns'
+import chatappImage from '../../images/chatapp_image.png'
+import {FaArrowLeft} from "react-icons/fa";
 
 const isValidate = (date) => {
   return date instanceof Date && !isNaN(date);
@@ -47,7 +50,7 @@ const ChatWindow = ({selectedContact,setSelectedContact}) => {
 
 
     useEffect(()=>{
-      if(selectedContact?._id && conversations?.data?.lenght >0){
+      if(selectedContact?._id && conversations?.data?.length >0){
         const conversation = conversations?.data?.find((conv)=>
         conv.participants.some((participant)=>participant._id === selectedContact?._id))
         if(conversation._id){
@@ -112,7 +115,7 @@ const ChatWindow = ({selectedContact,setSelectedContact}) => {
       setFilePreview(null);
 
       try {
-        const formData = new formData();
+        const formData = new FormData();
         formData.append("senderId",user?._id)
         formData.append("receiverId",selectedContact?._id)
 
@@ -131,17 +134,143 @@ const ChatWindow = ({selectedContact,setSelectedContact}) => {
         if(!message.trim() && !selectedFile) return;
         await sendMessage(formData);
 
-        //clear state 
+        //clear state
+        setMessage("");
+        setFilePreview(null);
+        setSelectedFile(null);
+        setShowFileMenu(false);
+
 
 
       } catch (error) {
-        
+        console.error("failed to send message",error);
       }
 
     } 
 
 
-  return  <div>chat window</div>;
+    const renderDateSeparator = (date)=>{
+      if(!isValidate(date)){
+        return null;
+      }
+      let dateString;
+      if(isToday(date)){
+        dateString = "Today"
+
+      }else if(isYesterday(date)){
+        dateString= "Yesterday"
+      }else{
+        dateString = format(date,"EEEE,MMM d")
+      }
+
+      return (
+        <div className="flex justify-center my-4">
+            <span className= {`px-4 py-2 rounded-full text-sm ${theme === 'dark' ?"bg-gary-700 text-gray-300":"bg-gray-200 text-gray-600"}`} 
+            >
+              {dateString}
+
+            </span>
+        </div>
+
+      )
+    }
+
+
+    // group message
+    const groupedMessages = Array.isArray(messages) ? messages.reduce((acc,message)=>{
+      if(!message.createdAt) return acc;
+      const date = new Date(message.createdAt);
+      if(isValidate(date)){
+        const dateString = format(date,"yyyy-MM-dd");
+        if(!acc[dateString]){
+          acc[dateString] = [];
+
+        }
+        acc[dateString].push(message);
+      }else{
+        console.error("Invalid date for message",message)
+      }
+      return acc;
+
+    },{}) :{};
+
+
+    const handleReaction = (messageId,emoji)=>{
+        addReaction (messageId,emoji)
+
+    }
+
+    console.log('this is my contact',selectedContact)
+
+    if(!selectedContact){
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center mx-auto h-screen text-center">
+          <div className="max-w-md">
+            <img 
+            src={chatappImage}
+            alt = "chat-app"
+            className="w-full h-auto"
+            />
+
+            <h2 className={`text-3xl font-semibold mb-4 ${theme === 'dark' ?"text-white":"text-black"}`}>
+              Select conversation to start
+            </h2>
+
+             <p className={` ${theme === 'dark' ?"text-gray-400":"text-gray-600"}mb-6`}>
+               Choose contact from left and start messaging
+            </p>
+            
+              <p className={`text-sm mt-8 flex items-center justify-center gap-2 ${theme === 'dark' ?"text-gray-400":"text-gray-600"}mb-6`}>
+                  🔒Your messages, your space — fully protected🔒
+              </p>
+
+            </div> 
+
+        </div>
+      )
+    }
+
+
+
+
+
+  return  (<div className="h-screen w-full flex-1 flex flex-col"> 
+    <div className={`p-4 ${theme === 'dark' ? "bg-[#303430] text-white":"bg-[rgb()] text-gray-600"} flex items-center `}>
+      <button className="mr-2 focus:outline-none"
+        onClick={()=> setSelectedContact(null)}
+      >
+        <FaArrowLeft className="h-6 w-6" />
+
+      </button>
+
+      <img src={selectedContact?.profilePicture}
+
+       alt={selectedContact?.username}
+       className="w-10 h-10 rounded-full" 
+       />
+
+      <div className="ml-3 flex-grow">
+        <h2 className="font-semibold text-start">
+          {selectedContact?.username}
+        </h2>
+
+        {isTyping? (
+          <div>Typing... </div>
+          ):(  
+            <p className={`text-sm ${theme === 'dark'?"text-gray-400":"text-gray-500"}`}>
+              {online ? "online" :lastSeen ?`Last seen ${format(new Date(lastSeen),"HH:mm")}`:"offline"}
+            </p>
+
+        )}
+
+
+      </div>
+
+
+
+    </div>
+  
+  </div>);
 };
 
 export default ChatWindow;
