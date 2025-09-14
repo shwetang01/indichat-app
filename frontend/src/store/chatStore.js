@@ -343,7 +343,7 @@ export const useChatStore = create((set,get)=>({
 
 
         } catch (error) {
-            console.error("failed to marks message as read".error)
+            console.error("failed to marks message as read",error)
         }
         
     },

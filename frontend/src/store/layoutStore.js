@@ -6,13 +6,13 @@ const useLayoutStore = create(
         (set) =>({
             activeTab:'chats', 
             selectedContact:null,          
-            setSelectedContact: (contact) =>set({selsectedContact:contact}),
+            setSelectedContact: (contact) =>set({selectedContact:contact}),
             setActiveTab:(tab) =>set({activeTab:tab})
 
         }),
         {
             name: "layout-storage",
-            getStorege: ()=> localStorage
+            getStorage: ()=> localStorage
 
         }
 
