@@ -20,7 +20,7 @@ export const useChatStore = create((set,get)=>({
         if(!socket) return ;
 
         // remove exiting listeners to prevent duplicate handlers
-        socket.off("receive_message");
+        socket.off("receiver_message");
         socket.off("user_typing");
         socket.off("user_status");
         socket.off("send_message");
@@ -29,7 +29,7 @@ export const useChatStore = create((set,get)=>({
 
         // listen for incoming messages
 
-        socket.on("receive_message",(message)=>{
+        socket.on("receiver_message",(message)=>{
 
         });
 
@@ -62,12 +62,12 @@ export const useChatStore = create((set,get)=>({
         });
 
         // remove message from local state
-         socket.on("message_deleted",({deletedMessageId})=>{
-            set((state) =>{
-                messages: state.messages.filter((msg)=> msg._id !==deletedMessageId)
-            })
-
+        socket.on("message_deleted",({deletedMessageId})=>{
+        set((state) => ({
+        messages: state.messages.filter((msg)=> msg._id !== deletedMessageId)
+          }));
         });
+
 
         // handle any message sending error
         socket.on("message_error",(error)=>{

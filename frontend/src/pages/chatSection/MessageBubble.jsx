@@ -14,8 +14,8 @@ const MessageBubble = ({
   deleteMessage,
 }) => {
   // console.log("this is my message", message);
-  console.log("Sender ID:", message.sender._id);
-  console.log("Current User ID:", currentUser?._id);
+  // console.log("Sender ID:", message.sender._id);
+  // console.log("Current User ID:", currentUser?._id);
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
@@ -25,9 +25,9 @@ const MessageBubble = ({
   const emojiPickerRef = useRef(null);
   const reactionsMenuRef = useRef(null);
 
-  // const isUserMessage = message.sender._id === currentUser?._id;
-  const isUserMessage =
-    String(message.sender?._id || message.sender) === String(currentUser?._id);
+  const isUserMessage = message.sender._id === currentUser?._id;
+  // const isUserMessage =
+  //   String(message.sender?._id || message.sender) === String(currentUser?._id);
 
   // using daisyui
   const bubbleClass = isUserMessage ? "chat-end" : "chat-start";
