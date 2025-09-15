@@ -1,10 +1,10 @@
 import { format } from "date-fns";
 import React, { useRef, useState } from "react";
-import { FaCheck, FaCheckDouble, FaPlus, FaSmile } from "react-icons/fa";
+import { FaCheck, FaCheckDouble, FaPlus, FaRegCopy, FaSmile } from "react-icons/fa";
 import { HiDotsVertical } from "react-icons/hi";
 import useOutsideclick from "../../hooks/useOutsideclick";
 import EmojiPicker from "emoji-picker-react";
-import {RxCross2} from "react-icons/rx"
+import { RxCross2 } from "react-icons/rx";
 
 const MessageBubble = ({
   message,
@@ -26,13 +26,13 @@ const MessageBubble = ({
   const reactionsMenuRef = useRef(null);
 
   // const isUserMessage = message.sender._id === currentUser?._id;
- const isUserMessage =
-  String(message.sender?._id || message.sender) === String(currentUser?._id);
+  const isUserMessage =
+    String(message.sender?._id || message.sender) === String(currentUser?._id);
 
   // using daisyui
   const bubbleClass = isUserMessage ? "chat-end" : "chat-start";
 
- const bubbleContentClass = isUserMessage
+  const bubbleContentClass = isUserMessage
     ? `chat-bubble md:max-w-[50%] min-w-[130px] ${
         theme === "dark"
           ? "bg-[#144d38] text-white"
@@ -42,7 +42,6 @@ const MessageBubble = ({
         theme === "dark" ? "bg-[#2c3e50] text-white" : "bg-gray-100 text-black "
       }`;
 
-
   const quickReactions = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
   const handleReact = (emoji) => {
@@ -51,25 +50,22 @@ const MessageBubble = ({
     setShowReactions(false);
   };
 
-  useOutsideclick(emojiPickerRef ,()=>{
-    if(showEmojiPicker) setShowEmojiPicker(false)
-  })
+  useOutsideclick(emojiPickerRef, () => {
+    if (showEmojiPicker) setShowEmojiPicker(false);
+  });
 
-   useOutsideclick(reactionsMenuRef ,()=>{
-    if(showReactions) setShowReactions(false)
-  })
+  useOutsideclick(reactionsMenuRef, () => {
+    if (showReactions) setShowReactions(false);
+  });
 
-   useOutsideclick(optionRef ,()=>{
-    if(showOptions) setShowOptions(false)
-  })
-
-
-
+  useOutsideclick(optionRef, () => {
+    if (showOptions) setShowOptions(false);
+  });
 
   if (message === 0) return;
 
   return (
-    <div className={`chat ${bubbleClass}`}>
+    <div className={`chat ${bubbleClass} mb-6`}>
       <div className={`${bubbleContentClass} relative group `} ref={messageRef}>
         <div className=" flex justify-center gap-2">
           {message.contentType === "text" && (
@@ -160,35 +156,76 @@ const MessageBubble = ({
         )}
 
         {showEmojiPicker && (
-         <div ref={emojiPickerRef} className="absolute left-0 mb-6 z-50">
+          <div ref={emojiPickerRef} className="absolute left-0 mb-6 z-50">
             <div className="relative">
               <EmojiPicker
-                    onEmojiClick={(emojiObject) => handleReact(emojiObject.emoji)}
-                    theme={theme}
+                onEmojiClick={(emojiObject) => handleReact(emojiObject.emoji)}
+                theme={theme}
               />
-              <button className="absolute top-2 right-2 text-gray-500 "
-                onClick={()=>setShowEmojiPicker(false)}
+              <button
+                className="absolute top-2 right-2 text-gray-500 "
+                onClick={() => setShowEmojiPicker(false)}
               >
-                <RxCross2/>
+                <RxCross2 />
               </button>
-            </div>                     
+            </div>
           </div>
         )}
 
         {message.reactions && message.reactions.length > 0 && (
-          <div className={`absolute -bottom-5 ${isUserMessage ? "right-2":"left-2"} rounded-full px-2 shadow bg-gray-200`} >
-            {message.reactions.map((reaction,index)=>(
+          <div
+            className={`absolute -bottom-5 ${
+              isUserMessage ? "right-2" : "left-2"
+            } rounded-full px-2 shadow ${
+              theme === "dark" ? "bg-[#2a3942]" : " bg-gray-200"
+            }`}
+          >
+            {message.reactions.map((reaction, index) => (
               <span key={index} className="mr-1">
                 {reaction.emoji}
               </span>
-            )) }
-
+            ))}
           </div>
-
         )}
 
+        {showOptions && (
+          <div
+            ref={optionRef}
+            className={`absolute top-8 right-1 z-50  w-36 rounded-xl py-2 twxt-sm shadow-lg ${
+              theme === "dark"
+                ? "bg-[#1d1f1f] text-white"
+                : " bg-gray-200 text-black"
+            }`}
+          >
+            <button onClick={()=> {
+                if(message.contentType ==='text'){
+                  navigator.clipboard.writeText(message.content)
+                }
+                setShowOptions(false)
+            }}
+            className="flex items-center w-full px-4 py-2 gap-3 rounded-lg"
+            >
+              <FaRegCopy size={14} />
+              <span>Copy</span>
 
+            </button>
 
+            {isUserMessage && (
+                <button onClick={()=> {
+                deleteMessage(message?._id)
+                setShowOptions(false)              
+               
+            }}
+            className="flex items-center w-full px-4 py-2 gap-3 rounded-lg text-red-700"
+            >
+              <FaRegCopy className="text-red-700" size={14} />
+              <span>Delete</span>
+
+            </button>
+            )}
+
+          </div>
+        )}
       </div>
     </div>
   );
