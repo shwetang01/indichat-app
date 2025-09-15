@@ -2,6 +2,9 @@ import { format } from "date-fns";
 import React, { useRef, useState } from "react";
 import { FaCheck, FaCheckDouble, FaPlus, FaSmile } from "react-icons/fa";
 import { HiDotsVertical } from "react-icons/hi";
+import useOutsideclick from "../../hooks/useOutsideclick";
+import EmojiPicker from "emoji-picker-react";
+import {RxCross2} from "react-icons/rx"
 
 const MessageBubble = ({
   message,
@@ -22,7 +25,9 @@ const MessageBubble = ({
   const emojiPickerRef = useRef(null);
   const reactionsMenuRef = useRef(null);
 
-  const isUserMessage = message.sender._id === currentUser?._id;
+  // const isUserMessage = message.sender._id === currentUser?._id;
+ const isUserMessage =
+  String(message.sender?._id || message.sender) === String(currentUser?._id);
 
   // using daisyui
   const bubbleClass = isUserMessage ? "chat-end" : "chat-start";
@@ -45,6 +50,21 @@ const MessageBubble = ({
     setShowEmojiPicker(false);
     setShowReactions(false);
   };
+
+  useOutsideclick(emojiPickerRef ,()=>{
+    if(showEmojiPicker) setShowEmojiPicker(false)
+  })
+
+   useOutsideclick(reactionsMenuRef ,()=>{
+    if(showReactions) setShowReactions(false)
+  })
+
+   useOutsideclick(optionRef ,()=>{
+    if(showOptions) setShowOptions(false)
+  })
+
+
+
 
   if (message === 0) return;
 
@@ -117,7 +137,7 @@ const MessageBubble = ({
           <div
             ref={reactionsMenuRef}
             className={`absolute -top-8 ${
-              isUserMessage ? "left-0" : "-left-36"
+              isUserMessage ? "left-0" : "left-36"
             } transform - translate-x-1/2 flex itmes-cente bg-[#202c33]/90 rounded-full px-2 py-1.5 gap-1 shadow-lg z-50`}
           >
             {quickReactions.map((emoji, index) => (
@@ -138,6 +158,37 @@ const MessageBubble = ({
             </button>
           </div>
         )}
+
+        {showEmojiPicker && (
+         <div ref={emojiPickerRef} className="absolute left-0 mb-6 z-50">
+            <div className="relative">
+              <EmojiPicker
+                    onEmojiClick={(emojiObject) => handleReact(emojiObject.emoji)}
+                    theme={theme}
+              />
+              <button className="absolute top-2 right-2 text-gray-500 "
+                onClick={()=>setShowEmojiPicker(false)}
+              >
+                <RxCross2/>
+              </button>
+            </div>                     
+          </div>
+        )}
+
+        {message.reactions && message.reactions.length > 0 && (
+          <div className={`absolute -bottom-5 ${isUserMessage ? "right-2":"left-2"} rounded-full px-2 shadow bg-gray-200`} >
+            {message.reactions.map((reaction,index)=>(
+              <span key={index} className="mr-1">
+                {reaction.emoji}
+              </span>
+            )) }
+
+          </div>
+
+        )}
+
+
+
       </div>
     </div>
   );

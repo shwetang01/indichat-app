@@ -26,13 +26,13 @@ const isValidate = (date) => {
 
 const ChatWindow = ({ selectedContact, setSelectedContact }) => {
   const [message, setMessage] = useState("");
-  const [showEmojiPicker, setshowEmojiPicker] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showFileMenu, setShowFileMenu] = useState(false);
   const [filePreview, setFilePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const typingTimeoutRef = useRef(null);
   const messageEndRef = useRef(null);
-  const emojiPicker = useRef(null);
+  const emojiPickerRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const { theme } = useThemeStore();
@@ -341,7 +341,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
       >
         <button
           className="focus:outline-none"
-          onClick={() => setshowEmojiPicker(!showEmojiPicker)}
+          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
         >
           <FaSmile
             className={`h-6 w-6 ${
@@ -351,11 +351,11 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
         </button>
 
         {showEmojiPicker && (
-          <div ref={emojiPicker} className="absolute left-0 bottom-16 z-50">
+          <div ref={emojiPickerRef} className="absolute left-0 bottom-16 z-50">
             <EmojiPicker
               onEmojiClick={(emojiObject) => {
                 setMessage((prev) => prev + emojiObject.emoji);
-                setshowEmojiPicker(false)
+                setShowEmojiPicker(false)
               }}
               theme={theme}
             />
