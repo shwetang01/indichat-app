@@ -93,7 +93,7 @@ const MessageBubble = ({
                 <FaCheckDouble size={12} />
               )}
               {message.messageStatus === "read" && (
-                <FaCheckDouble size={12} className="text-blue-900" />
+                <FaCheckDouble size={12} className="text-blue-700" />
               )}
             </>
           )}

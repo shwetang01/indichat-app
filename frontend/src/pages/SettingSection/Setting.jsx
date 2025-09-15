@@ -18,7 +18,8 @@ import { Link } from "react-router-dom";
 const Setting = () => {
   const [isThemeDialogOpen, setIsDialogOpen] = useState(false);
   const { user, clearUser } = useUserStore();
-  const { theme } = useThemeStore();
+  const { theme, setTheme } = useThemeStore();
+
   const toggleThemeDialog = () => {
     setIsDialogOpen(!isThemeDialogOpen);
   };
@@ -27,17 +28,14 @@ const Setting = () => {
     try {
       await logoutUser();
       clearUser();
-      toast.success("user logged out successfully");
+      toast.success("User logged out successfully");
     } catch (error) {
-      console.error("failed to logout", error);
+      console.error("Failed to logout", error);
     }
   };
 
   return (
-    <Layout
-      isThemeDialogOpen={isThemeDialogOpen}
-      toggleThemeDialog={toggleThemeDialog}
-    >
+    <Layout>
       <div
         className={`flex-h-screen ${
           theme === "dark"
@@ -46,30 +44,31 @@ const Setting = () => {
         }`}
       >
         <div
-          className={`w-[400px] border-r ${
+          className={`w-[400px] border-l ml-auto ${
             theme === "dark" ? "border-gray-600" : "border-gray-200"
           }`}
         >
           <div className="p-4">
             <h1 className="text-xl font-semibold mb-4">Settings</h1>
 
+            {/* search */}
             <div className="relative mb-4">
               <FaSearch className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-
               <input
                 placeholder="Search settings"
                 className={`w-full ${
                   theme === "dark"
                     ? "bg-[#202c33] text-white"
                     : "bg-gray-100 text-black"
-                } border-none pl-10 placeholder:gray-400 rounded pd-2 `}
+                } border-none pl-10 placeholder-gray-400 rounded p-2`}
                 type="text"
               />
             </div>
 
+            {/* profile */}
             <div
               className={`flex items-center gap-4 p-3 ${
-                theme === "dark" ? "hover:bg-[202c33" : "hover:bg-gray-100"
+                theme === "dark" ? "hover:bg-[202c33]" : "hover:bg-gray-100"
               } rounded-lg cursor-pointer mb-4 `}
             >
               <img
@@ -77,7 +76,6 @@ const Setting = () => {
                 alt="profile"
                 className="w-14 h-14 rounded-full"
               />
-
               <div>
                 <h2 className="font-semibold">{user?.username}</h2>
                 <p className="text-sm text-gray-400">{user?.about}</p>
@@ -94,7 +92,7 @@ const Setting = () => {
                 ].map((item) => (
                   <Link
                     to={item.href}
-                    key={item.lable}
+                    key={item.label}
                     className={`w-full flex items-center gap-3 p-2 rounded ${
                       theme === "dark"
                         ? "text-white hover:bg-[#202c33]"
@@ -103,9 +101,9 @@ const Setting = () => {
                   >
                     <item.icon className="h-5 w-5" />
                     <div
-                      className={`w-full border-b${
+                      className={` border-b ${
                         theme === "dark" ? "border-gray-700" : "border-gray-200"
-                      } p-4`}
+                      } p-4 w-full`}
                     >
                       {item.label}
                     </div>
@@ -126,13 +124,12 @@ const Setting = () => {
                   ) : (
                     <FaSun className="h-5 w-5" />
                   )}
-
                   <div
                     className={`flex flex-col text-start border-b ${
                       theme === "dark"
                         ? "border-gray-700"
-                        : "border-gray-200 w-full p-2"
-                    }`}
+                        : "border-gray-200"
+                    } w-full p-2`}
                   >
                     Theme
                     <span className="ml-auto text-sm text-gray-400">
@@ -142,24 +139,55 @@ const Setting = () => {
                 </button>
               </div>
 
+              {/* logout */}
               <button
                 className={`w-full flex items-center gap-3 p-2 rounded text-red-500 ${
                   theme === "dark"
                     ? "text-white hover:bg-[#202c33]"
                     : "text-black hover:bg-gray-100"
-                } mt-10 md:mt-33`}
+                } mt-10 md:mt-36`}
                 onClick={handleLogout}
               >
                 <FaSignInAlt className="h-5 w-5" />
                 Log out
               </button>
-
-
-
             </div>
           </div>
         </div>
       </div>
+
+      {/* Theme Popup */}
+      {isThemeDialogOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+          <div
+            className={`${
+              theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"
+            } p-6 rounded-lg shadow-lg w-80`}
+          >
+            <h2 className="text-lg font-semibold mb-4">Choose a Theme</h2>
+            <div className="flex justify-between">
+              <button
+                onClick={() => setTheme("light")}
+                className="px-4 py-2 rounded bg-gray-200 text-black hover:bg-gray-300"
+              >
+                Light
+              </button>
+              <button
+                onClick={() => setTheme("dark")}
+                className="px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-600"
+              >
+                Dark
+              </button>
+            </div>
+            <button
+              onClick={toggleThemeDialog}
+              className="mt-4 text-sm text-blue-500 hover:underline"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

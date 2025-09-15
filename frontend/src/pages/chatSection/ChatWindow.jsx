@@ -68,7 +68,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
           (participant) => participant._id === selectedContact?._id
         )
       );
-      if (conversation._id) {
+      if (conversation?._id) {
         fetchMessages(conversation._id);
       }
     }
