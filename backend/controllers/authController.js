@@ -132,7 +132,7 @@ const updateProfile = async(req,res) =>{
          console.error(error);
         return response(res,500,'Internal sarver error');
     }
-}
+};
 
 const checkAuthentication = async(req,res)=>{
     try {

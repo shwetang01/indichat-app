@@ -23,16 +23,22 @@ export const verifyOtp = async(phoneNumber,phoneSuffix,otp,email) =>{
     }
 }
 
-export const updateUserProfile = async(updateData) =>{
-    try {
-        const response = await axiosInstance.put('/auth/update-profile',{updateData});
-        return response.data;
-        
-    } catch (error) {
-        throw error.response ?error.response.data :error.message;
-
-    }
-}
+export const updateUserProfile = async (formData) => {
+  try {
+    const response = await axiosInstance.put(
+      '/auth/update-profile',
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
 
 export const checkUserAuth = async() =>{
     try {

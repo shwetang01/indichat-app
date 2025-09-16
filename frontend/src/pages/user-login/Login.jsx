@@ -3,16 +3,16 @@ import useLoginStore from "../../store/useLoginStore";
 import countries from "../../utils/countriles";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
+import { set,useForm } from "react-hook-form";
 import useThemeStore from "../../store/themeStore";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../store/useUserStore";
-import { motion, spring } from "framer-motion";
+import { motion, scale } from "framer-motion";
 // Using react-icons
 import { FaArrowLeft, FaChevronDown, FaPlus } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import Spinner from "../../utils/Spinner";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import {
   sendOtp,
   updateUserProfile,

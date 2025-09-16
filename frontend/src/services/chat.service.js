@@ -38,6 +38,13 @@ export const initializeSocket = ()=>{
         
     })
 
+//      useUserStore.subscribe((state) => {
+//     if (socket && socket.connected && state.user?._id) {
+//       console.log("User changed, re-emitting user_connected", state.user._id);
+//       socket.emit("user_connected", state.user._id);
+//     }
+//   });
+
     return socket;
     
 
