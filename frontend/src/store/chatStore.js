@@ -29,9 +29,10 @@ export const useChatStore = create((set,get)=>({
 
         // listen for incoming messages
 
-        socket.on("receiver_message",(message)=>{
-
+        socket.on("receiver_message", (message) => {
+        get().receiveMessage(message);
         });
+
 
         // confirm message delivery
         socket.on("send_message",(message) =>{
@@ -184,7 +185,7 @@ export const useChatStore = create((set,get)=>({
         }
     },
 
-    // send msg in real tome
+    // send msg in real time
     sendMessage :async (formData)=> {
         const senderId = formData.get("senderId");
         const receiverId = formData.get("receiverId");

@@ -53,6 +53,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
     isUserOnline,
     cleanup,
     addReaction,
+    currentConversation,
     deleteMessage,
   } = useChatStore();
 

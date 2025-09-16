@@ -25,9 +25,9 @@ const MessageBubble = ({
   const emojiPickerRef = useRef(null);
   const reactionsMenuRef = useRef(null);
 
-  const isUserMessage = message.sender._id === currentUser?._id;
-  // const isUserMessage =
-  //   String(message.sender?._id || message.sender) === String(currentUser?._id);
+  // const isUserMessage = message.sender._id === currentUser?._id;
+  const senderId = message.sender?._id || message.sender;  
+  const isUserMessage = String(senderId) === String(currentUser?._id);
 
   // using daisyui
   const bubbleClass = isUserMessage ? "chat-end" : "chat-start";
@@ -65,12 +65,15 @@ const MessageBubble = ({
   if (message === 0) return;
 
   return (
+
     <div className={`chat ${bubbleClass} mb-6`}>
       <div className={`${bubbleContentClass} relative group `} ref={messageRef}>
         <div className=" flex justify-center gap-2">
           {message.contentType === "text" && (
             <p className="mr-2">{message.content}</p>
           )}
+
+          
 
           {message.contentType === "image" && (
             <div>
@@ -82,11 +85,11 @@ const MessageBubble = ({
               <p className="mt-1">{message.content}</p>
             </div>
           )}
+
           {message.contentType === "video" && (
             <div>
-              <img
+              <video
                 src={message.imageOrVideoUrl}
-                alt="image-video"
                 controls
                 className="rounded-lg max-w-xs"
               />
@@ -94,7 +97,10 @@ const MessageBubble = ({
             </div>
           )}
 
+
         </div>
+
+        
 
         <div className="self-end flex items-center justify-end gap-1 text-xs opacity-60 mt-2 ml-2">
           <span>{format(new Date(message.createdAt), "HH:mm")} </span>

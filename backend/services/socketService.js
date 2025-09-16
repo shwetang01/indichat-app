@@ -1,6 +1,7 @@
 const {Server} = require('socket.io');
 const Message = require("../models/Message");
 const User = require('../models/User');
+const handleVideoCallEvent = require('./video-call-events');
 
 
 
@@ -32,6 +33,7 @@ const initializeSocket = (server)=>{
         socket.on("user_connected",async(connectingUserId)=>{
             try {
                 userId = connectingUserId
+                socket.userId= userId;
                 onlineUsers.set(userId,socket.id);
                 socket.join(userId)   // join a prsonal room for direct emits
                 
@@ -213,8 +215,12 @@ const initializeSocket = (server)=>{
             }
         }
         );
-      //handle disconnection and ark user offline
 
+        // handle video call events
+        handleVideoCallEvent(socket,io,onlineUsers)
+
+
+      //handle disconnection and ark user offline
         const handleDisconnected = async() =>{
             if(!userId) return ;
 

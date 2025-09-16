@@ -37,9 +37,9 @@ try {
 
         imageOrVideoUrl = uploadFile?.secure_url;
         if(file.mimetype.startsWith('image')){
-            contentType="image"
+            contentType="image";
         }else  if(file.mimetype.startsWith('video')){
-            contentType="video"
+            contentType="video";
         }else{
             return response(res,400,'Unsupported file type');
         }
@@ -60,6 +60,8 @@ try {
         messageStatus
 
     });
+
+    console.log(message);
 
     await message.save();
 
