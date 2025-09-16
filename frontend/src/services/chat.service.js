@@ -9,7 +9,7 @@ export const initializeSocket = ()=>{
 
 
 
-    const user = useUserStore.getState().user;
+    // const user = useUserStore.getState().user;
 
     const BACKEND_URL = process.env.REACT_APP_API_URL;
 
@@ -22,10 +22,16 @@ export const initializeSocket = ()=>{
 
     // connections event
 
-    socket.on("connect", ()=>{
-        console.log("socket connected",socket.id)
-        socket.emit("user_connected",user._id)
-    })
+    socket.on("connect", () => {
+    console.log("socket connected", socket.id);
+
+    const user = useUserStore.getState().user;
+    if (user && user._id) {
+      socket.emit("user_connected", user._id);
+    } else {
+      console.warn("⚠️ No user available at connect, skipping emit");
+    }
+  });
 
     socket.on("connect_error",(error)=>{
         console.error("socket connection error",error)

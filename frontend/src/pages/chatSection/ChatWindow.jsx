@@ -111,7 +111,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
     if (file) {
       setSelectedFile(file);
       setShowFileMenu(false);
-      if (file.type.startsWith("image/")) {
+      if (file.type.startsWith("image/") || (file.type.startsWith("video/"))) {
         setFilePreview(URL.createObjectURL(file));
       }
     }
@@ -317,11 +317,20 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
       </div>
       {filePreview && (
         <div className="relative p-2">
-          <img
+          {selectedFile?.type.startsWith("video/")?( <video 
+            src= {filePreview}
+            controls
+            className="w-80 object-cover rounded shadow-lg mx-auto"
+
+          /> )
+          : (  <img
             src={filePreview}
             alt="file-preview"
             className="w-80 0bject-cover rounded shadow-lg mx-auto"
-          />
+          /> )
+        }
+
+         
           <button
             onClick={() => {
               setSelectedFile(null);

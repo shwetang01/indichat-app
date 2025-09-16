@@ -71,6 +71,7 @@ const MessageBubble = ({
           {message.contentType === "text" && (
             <p className="mr-2">{message.content}</p>
           )}
+
           {message.contentType === "image" && (
             <div>
               <img
@@ -81,6 +82,18 @@ const MessageBubble = ({
               <p className="mt-1">{message.content}</p>
             </div>
           )}
+          {message.contentType === "video" && (
+            <div>
+              <img
+                src={message.imageOrVideoUrl}
+                alt="image-video"
+                controls
+                className="rounded-lg max-w-xs"
+              />
+              <p className="mt-1">{message.content}</p>
+            </div>
+          )}
+
         </div>
 
         <div className="self-end flex items-center justify-end gap-1 text-xs opacity-60 mt-2 ml-2">

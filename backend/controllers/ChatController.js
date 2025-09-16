@@ -36,9 +36,9 @@ try {
         };
 
         imageOrVideoUrl = uploadFile?.secure_url;
-        if(file.mimetype.startswith('image')){
+        if(file.mimetype.startsWith('image')){
             contentType="image"
-        }else  if(file.mimetype.startswith('video')){
+        }else  if(file.mimetype.startsWith('video')){
             contentType="video"
         }else{
             return response(res,400,'Unsupported file type');
