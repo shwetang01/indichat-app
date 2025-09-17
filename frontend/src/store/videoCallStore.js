@@ -115,7 +115,7 @@ const useVideoCallStore = create(
 
             set({
                 currentCall:null,
-                currentCall: null,
+                
     incomingCall: null,
     isCallActive: false,
     callType: null, 

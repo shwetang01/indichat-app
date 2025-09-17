@@ -19,6 +19,9 @@ import useLayoutStore from "../../store/layoutStore";
 import { object } from "yup";
 import MessageBubble from "./MessageBubble";
 import EmojiPicker from "emoji-picker-react";
+import VideoCallManager from "../VideoCall/VideoCallManager";
+import { getSocket } from "../../services/chat.service";
+import useVideoCallStore from "../../store/videoCallStore";
 
 const isValidate = (date) => {
   return date instanceof Date && !isNaN(date);
@@ -37,6 +40,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
 
   const { theme } = useThemeStore();
   const { user } = useUserStore();
+  const {socket} = getSocket();
 
   const {
     messages,
@@ -201,6 +205,27 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
     addReaction(messageId, emoji);
   };
 
+  const handleVideocall = () =>{
+    if(selectedContact && online ){
+      const {initiateCall }= useVideoCallStore.getState();
+
+      const avatar = selectedContact?.profilePicture;
+      initiateCall(
+        selectedContact?._id,
+        selectedContact?.username,
+        avatar,
+        "video"
+
+      )
+
+    }else{
+      alert("user is offline,cannot initiate the call")
+    }
+
+  };
+
+
+
   if (!selectedContact) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center mx-auto h-screen text-center">
@@ -236,6 +261,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
   }
 
   return (
+    <> 
     <div className="h-screen w-full flex-1 flex flex-col">
       <div
         className={`p-4 ${
@@ -279,9 +305,10 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
           )}
         </div>
 
+          {/* for videcall */}
         <div className="flex items-center space-x-4">
-          <button className="focus:outline-none">
-            <FaVideo className="h-5 w-5" />
+          <button className="focus:outline-none" onClick={handleVideocall} title={online?"start videocall":"user is offline"} >
+            <FaVideo className="h-5 w-5 text-blue-400 hover:text-blue-600" />
           </button>
           <button className="focus:outline-none">
             <FaEllipsisV className ="h-5 w-5" />
@@ -444,6 +471,10 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
 
       </div>
     </div>
+
+      <VideoCallManager socket={socket} />
+
+</>
   );
 };
 
