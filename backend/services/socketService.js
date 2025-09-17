@@ -230,7 +230,7 @@ const initializeSocket = (server)=>{
                 // clear all typing timeouts
                 if(typingUsers.has(userId)) {
                     const userTyping = typingUsers.get(userId);
-                    object.keys(userTyping).forEach((key)=>{
+                    Object.keys(userTyping).forEach((key)=>{
                         if(key.endsWith('_timeout')) clearTimeout(userTyping[key])
                     })
 
@@ -247,7 +247,7 @@ const initializeSocket = (server)=>{
                     lastSeen: new Date(),
                 })
 
-                socket.leave('userId'),
+                socket.leave(userId),
                 console.log(`user ${userId} disconnected`)
 
 
