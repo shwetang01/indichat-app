@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo, use } from "react";
 import useVideoCallStore from "../../store/videoCallStore";
 import useUserStore from "../../store/useUserStore";
 import useThemeStore from "../../store/themeStore";
-import {FaPhoneSlash, FaViadeo, FaVideo} from "react-icons/fa";
+import { FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes, FaViadeo, FaVideo, FaVideoSlash } from "react-icons/fa";
 
 const VideocallModal = ({ socket }) => {
   const localVideoRef = useRef(null);
@@ -106,6 +106,8 @@ const VideocallModal = ({ socket }) => {
 
       console.log("Local media stream", stream.getTracks());
       setLocalStream(stream);
+      return stream;
+      
     } catch (error) {
       console.error("Media error", error);
       throw error;
@@ -374,7 +376,7 @@ const VideocallModal = ({ socket }) => {
 
   if (!isCallModalOpen && !incomingCall) return null;
 
-  const shouldShowActivecall =
+  const shouldShowActiveCall =
     isCallActive || callStatus === "calling" || callStatus === "connecting";
 
   return (
@@ -394,6 +396,9 @@ const VideocallModal = ({ socket }) => {
                   src={displayInfo?.avatar}
                   alt={displayInfo?.name}
                   className="w-full h-full object-cover"
+                  onError={(e)=>{
+                    e.target.src ="/placeholder.svg"
+                  }}
                 />
               </div>
               <h2
@@ -403,32 +408,168 @@ const VideocallModal = ({ socket }) => {
               >
                 {displayInfo?.name}
               </h2>
-              <p className={`text-lg ${theme ==='dark' ?"text-gray-300":"text-gray-600"}`}>
+              <p
+                className={`text-lg ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
                 Incoming {callType} Call...
               </p>
             </div>
             <div className="flex space-x-6">
-                <button  onClick={handleRejectCall}
-                className="w-16 h-16 bg-red-500 hover:bg-red-700 rounded-full flex items-center justify-center text-white transition-colors">
-                    <FaPhoneSlash  className="w-6 h-6"/>
-                </button>
+              <button
+                onClick={handleRejectCall}
+                className="w-16 h-16 bg-red-500 hover:bg-red-700 rounded-full flex items-center justify-center text-white transition-colors"
+              >
+                <FaPhoneSlash className="w-6 h-6" />
+              </button>
 
-                 <button  onClick={handleAnswerCall}
-                className="w-16 h-16 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center text-white transition-colors">
-                    <FaVideo className="w-6 h-6" />
-                </button>
-
+              <button
+                onClick={handleAnswerCall}
+                className="w-16 h-16 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center text-white transition-colors"
+              >
+                <FaVideo className="w-6 h-6" />
+              </button>
             </div>
           </div>
         )}
 
         {/* Active call ui */}
+        {shouldShowActiveCall && (
+          <div className="relative w-full h-full">
+            { callType ==='video' && (
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className={`w-full h-full object-cover bg-gray-800 ${remoteStream ? 'block' : 'hidden'}`
+              }/>
+            )}
 
-        {shouldShowActivecall &&(
-            <div>
-                
+        {/* Avatar / status display */}
+        {(!remoteStream || callType !== "video") && (
+          <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
+                <img
+                  src={displayInfo?.avatar}
+                  alt={displayInfo?.name}
+                  className="w-full h-full object-cover"
+                    onError={(e)=>{
+                    e.target.src ="/placeholder.svg"
+                  }}
+
+                />
+              </div>
+              <p className="text-white text-xl">
+                {callStatus === "calling"
+                  ? `Calling ${displayInfo?.name}...`
+                  : callStatus === "connecting"
+                  ? "connecting..."
+                  : callStatus === "connected"
+                  ? displayInfo?.name
+                  : callStatus === "failed"
+                  ? "Connection failed"
+                  : displayInfo?.name}
+              </p>
             </div>
+          </div>
         )}
+
+        {/* local video (picture in picture) */}
+        {callType === "video" && localStream && (
+          <div className="absolute top-4 right-4 w-48 h-36 bg-gray-800 rounded-lg overflow-hidden border-2 border-white">
+            <video
+              ref={localVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        {/* call status */}
+        <div className="absolute top-4 left-4">
+          <div
+            className={`px-4 py-2 rounded-full ${
+              theme === "dark" ? "bg-gray-800" : "bg-white"
+            } bg-opacity-75`}
+          >
+            <p
+              className={`text-sm ${
+                theme === "dark" ? "text-white" : "text-gray-900"
+              }`}
+            >
+              {callStatus === "connected" ? "Connected" : callStatus}
+            </p>
+          </div>
+        </div>
+
+        {/* call controls */}
+
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex space-x-4">
+            {callType === "video" && (
+              <button
+              onClick={toggleVideo}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                  isVideoEnabled
+                    ? "bg-gray-600 hover:bg-gray-700 text-white"
+                    : "bg-red-500 hover:bg-red-600 text-white"
+                }  `}
+              >
+                {isVideoEnabled ? (
+                  <FaVideo className="w-5 h-5" />
+                ) : (
+                  <FaVideoSlash className="w-5 h-5" />
+                )}
+              </button>
+            )}
+
+            <button
+                onClick={toggleAudio}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                  isAudioEnabled
+                    ? "bg-gray-600 hover:bg-gray-700 text-white"
+                    : "bg-red-500 hover:bg-red-600 text-white"
+                }  `}
+              >
+                {isAudioEnabled ? (
+                  <FaMicrophone className="w-5 h-5" />
+                ) : (
+                  <FaMicrophoneSlash className="w-5 h-5" />
+                )}
+              </button>
+
+              <button
+                onClick={handleEndCall}
+                className="w-12 h-12 bg-red-500 hover:bg-red-700 rounded-full flex items-center justify-center text-white transition-colors"
+              >
+                <FaPhoneSlash className="w-5 h-5" />
+              </button>
+
+
+
+          </div>
+        </div>
+           </div>
+        )}
+
+        {/* endcall */}
+
+        {callStatus ==='calling' && (
+            <button
+                onClick={handleEndCall}
+                className=" absolute top-4 right-4 w-8 h-8  bg-gray-600 hover:bg-gray-700 rounded-full flex items-center justify-center text-white transition-colors"
+              >
+                <FaTimes className="w-5 h-5" />
+              </button>
+
+        )}
+
+
+
 
 
       </div>

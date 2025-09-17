@@ -57,7 +57,7 @@ const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, endCall,
         setCallModalOpen(true);
         setCallStatus("calling");
 
-        // Emit the call initiate
+    // Emit the call initiate
         socket.emit("initiate_call", {
             callerId:user?._id,
             receiverId,
@@ -76,10 +76,11 @@ const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, endCall,
 // expose the initiate call fn to store
 useEffect(()=>{
     useVideoCallStore.getState().initiateCall = initiateCall
-},[initiateCall])
+},[initiateCall]);
 
 
-  return <setCallModal socket />
+  return <setCallModal  />
+//  return null;
 
 };
 

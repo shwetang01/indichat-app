@@ -13,7 +13,7 @@ const handleVideoCallEvent = (socket, io, onlineUsers) => {
                 callerName: callerInfo.username,
                 callerAvatar: callerInfo.profilePicture,
                 callId,
-                callType
+                callType,
             });
         } else {
             console.log(`server: Receiver ${receiverId} is offline`);
@@ -80,21 +80,23 @@ const handleVideoCallEvent = (socket, io, onlineUsers) => {
                 senderId: socket.userId,
                 callId
             });
-            console.log(`server: answer forwarded to ${receiverId}`);
+            console.log(`server answer forwarded to ${receiverId}`);
         } else {
             console.log(`server: Receiver ${receiverId} not found for the answer`);
         }
     });
 
-    // WebRTC ICE candidate
+    // WebRTC (ICE candidate) signaling with userid
     socket.on("webrtc_ice_candidate", ({ candidate, receiverId, callId }) => {
         const receiverSocketId = onlineUsers.get(receiverId);
+
+        console.log("connecting ice candidate")
 
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("webrtc_ice_candidate", {
                 candidate,
                 senderId: socket.userId,
-                callId
+                callId,
             });
         } else {
             console.log(`server: Receiver ${receiverId} not found for the ICE candidate`);
