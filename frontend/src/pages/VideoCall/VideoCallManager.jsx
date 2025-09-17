@@ -1,6 +1,7 @@
 import React, { useEffect,useCallback } from 'react'
 import useUserStore from '../../store/useUserStore'
 import useVideoCallStore from '../../store/videoCallStore';
+import VideocallModal from './VideocallModal';
 
 const VideoCallManager = ({socket}) => {
 const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, endCall, setCallStatus } = useVideoCallStore();
@@ -79,8 +80,8 @@ useEffect(()=>{
 },[initiateCall]);
 
 
-  return <setCallModal  />
-//  return null;
+  return <VideocallModal socket ={socket}  />
+
 
 };
 

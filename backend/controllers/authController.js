@@ -1,6 +1,6 @@
 
 const otpGenerate = require("../utils/otpGenerator");
-const User = require("../models/user");
+const User = require("../models/User");
 const sendOtpToEmail = require("../services/emailService");
 const response = require("../utils/responseHandler");
 const twilloService = require('../services/twilloServices');

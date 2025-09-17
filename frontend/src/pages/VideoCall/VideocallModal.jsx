@@ -58,7 +58,7 @@ const VideocallModal = ({ socket }) => {
 
   // Memorize display the user info and it is prevent the unnecessary re-render
   const displayInfo = useMemo(() => {
-    if (incomingCall && isCallActive) {
+    if (incomingCall && !isCallActive) {
       return {
         name: incomingCall.callerName,
         avatar: incomingCall.callerAvatar,
@@ -107,7 +107,7 @@ const VideocallModal = ({ socket }) => {
       console.log("Local media stream", stream.getTracks());
       setLocalStream(stream);
       return stream;
-      
+
     } catch (error) {
       console.error("Media error", error);
       throw error;
@@ -388,7 +388,7 @@ const VideocallModal = ({ socket }) => {
       >
         {/* //incoming call ui */}
 
-        {incomingCall && isCallActive && (
+        {incomingCall && !isCallActive && (
           <div className="flex flex-col items-center justify-center h-full p-8">
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
@@ -442,7 +442,7 @@ const VideocallModal = ({ socket }) => {
               ref={remoteVideoRef}
               autoPlay
               playsInline
-              className={`w-full h-full object-cover bg-gray-800 ${remoteStream ? 'block' : 'hidden'}`
+              className={`w-full h-full object-cover bg-gray-800 ${remoteStream ? "block" : "hidden"}`
               }/>
             )}
 
