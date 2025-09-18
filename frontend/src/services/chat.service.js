@@ -9,13 +9,13 @@ export const initializeSocket = ()=>{
 
 
 
-    // const user = useUserStore.getState().user;
+    const user = useUserStore.getState().user;
 
     const BACKEND_URL = process.env.REACT_APP_API_URL;
 
     socket = io (BACKEND_URL,{
         withCredentials:true,
-        transports:["websocket","polling"],
+        transports:["websocket", "polling"],
         reconnectionAttempts:5,
         reconnectionDelay:1000,
     });
@@ -24,13 +24,15 @@ export const initializeSocket = ()=>{
 
     socket.on("connect", () => {
     console.log("socket connected", socket.id);
+    socket.emit("user_connected",user._id);
 
-    const user = useUserStore.getState().user;
-    if (user && user._id) {
-      socket.emit("user_connected", user._id);
-    } else {
-      console.warn("⚠️ No user available at connect, skipping emit");
-    }
+
+    // const user = useUserStore.getState().user;
+    // if (user && user._id) {
+    //   socket.emit("user_connected", user._id);
+    // } else {
+    //   console.warn("⚠️ No user available at connect, skipping emit");
+    // }
   });
 
     socket.on("connect_error",(error)=>{
