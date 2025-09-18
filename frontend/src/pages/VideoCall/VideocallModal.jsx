@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useMemo, use } from "react";
-import useVideoCallStore from "../../store/videoCallStore";
+
 import useUserStore from "../../store/useUserStore";
 import useThemeStore from "../../store/themeStore";
 import { FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes, FaViadeo, FaVideo, FaVideoSlash } from "react-icons/fa";
+import useVideoCallStore from "../../store/videoCallStore";
+
 
 const VideocallModal = ({ socket }) => {
   const localVideoRef = useRef(null);
@@ -97,23 +99,35 @@ const VideocallModal = ({ socket }) => {
   }, [remoteStream]);
 
   // Initialize media stream
+
   const initializeMedia = async (video = true) => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: video ? { width: 640, height: 480 } : false,
-        audio: true,
-      });
+  try {
+    const constraints = {
+      video: video ? { width: 640, height: 480 } : false,
+      audio: true,
+    };
 
-      console.log("Local media stream", stream.getTracks());
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    console.log("✅ Local media stream", stream.getTracks());
+    setLocalStream(stream);
+    return stream;
+
+  } catch (error) {
+    console.error("❌ Media error", error.name, error.message);
+
+    // Special handling for NotReadableError (device busy)
+    if (error.name === "NotReadableError") {
+      alert("Your camera/mic is already in use by another tab/app.");
+      // Optional: fallback to fake video track so app doesn't crash
+      const stream = new MediaStream();
       setLocalStream(stream);
-      
       return stream;
-
-    } catch (error) {
-      console.error("Media error", error);
-      throw error;
     }
-  };
+
+    throw error;
+  }
+};
+
 
   // Create peer connection
   const createPeerConnection = (stream, role) => {
