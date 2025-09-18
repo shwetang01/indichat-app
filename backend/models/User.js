@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   username:{type:String},
   about:{type:String},
   lastSeen:{type:Date },
-  isOnline:{type:Boolean, default:false},
+  isOnline:{type:Boolean , default:false},
   isVerified:{type:Boolean,default:false},
   agreed:{type:Boolean,default:false},
 

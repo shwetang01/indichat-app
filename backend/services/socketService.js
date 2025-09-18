@@ -259,7 +259,7 @@ const initializeSocket = (server)=>{
         }
 
         // disconnect event 
-        socket.on("disconnected",handleDisconnected)
+        socket.on("disconnect",handleDisconnected)
     });   
     
     // attach online usermap to socket server for external user
