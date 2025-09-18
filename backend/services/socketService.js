@@ -240,7 +240,7 @@ const initializeSocket = (server)=>{
                 })
 
                 io.emit("user_status",{
-                    userId,isOnline :false,
+                    userId , isOnline :false,
                     lastSeen: new Date(),
                 })
 
@@ -256,7 +256,7 @@ const initializeSocket = (server)=>{
         }
 
         // disconnect event 
-        socket.on("disconnect",handleDisconnected)
+        socket.on("disconnect", handleDisconnected)
     });   
     
     // attach online usermap to socket server for external user
