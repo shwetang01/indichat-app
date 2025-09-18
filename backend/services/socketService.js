@@ -37,7 +37,7 @@ const initializeSocket = (server)=>{
                 onlineUsers.set(userId,socket.id);
                 socket.join(userId)   // join a prsonal room for direct emits
                 
-                // update use status in db 
+                // update user status in db 
                 await User.findByIdAndUpdate(userId,{
                     isOnline :true,
                     lastSeen: new Date(),
@@ -62,7 +62,7 @@ const initializeSocket = (server)=>{
             callback({
                 userId:requestedUserId,
                 isOnline,
-                lastSeen: isOnline? new Date() :null,
+                lastSeen: isOnline ? new Date() :null,
             })
 
         })
@@ -109,7 +109,7 @@ const initializeSocket = (server)=>{
          socket.on("typing_start",({conversationId,receiverId})=>{
             if(!userId || !conversationId || !receiverId) return;
 
-            if(!typingUsers.has(userId)) typingUsers.set(userId,{});
+            if(!typingUsers.has(userId)) typingUsers.set(userId, {});
             const userTyping = typingUsers.get(userId)
 
             userTyping[conversationId]= true;
@@ -137,14 +137,12 @@ const initializeSocket = (server)=>{
             })
 
 
-
-
          })
 
          socket.on("typing_stop",({conversationId,receiverId})=>{
              if(!userId || !conversationId || !receiverId) return;
 
-            if(!typingUsers.has(userId)) {
+            if(typingUsers.has(userId)) {
                 const userTyping = typingUsers.get(userId);
                 userTyping[conversationId] = false;
                
@@ -161,9 +159,8 @@ const initializeSocket = (server)=>{
                 conversationId,
                 isTyping:false
             })
-
-
          })
+
 
          //  add or update reaction on message
          socket.on("add_reaction",async({messageId,emoji,userId:reactionUserId})=>{
@@ -220,7 +217,7 @@ const initializeSocket = (server)=>{
         handleVideoCallEvent(socket,io,onlineUsers)
 
 
-      //handle disconnection and ark user offline
+      //handle disconnection and mark user offline
         const handleDisconnected = async() =>{
             if(!userId) return ;
 
