@@ -24,15 +24,13 @@ export const initializeSocket = ()=>{
 
     socket.on("connect", () => {
     console.log("socket connected", socket.id);
-    socket.emit("user_connected",user._id);
-
 
     // const user = useUserStore.getState().user;
-    // if (user && user._id) {
-    //   socket.emit("user_connected", user._id);
-    // } else {
-    //   console.warn("⚠️ No user available at connect, skipping emit");
-    // }
+    if (user && user._id) {
+      socket.emit("user_connected", user._id);
+    } else {
+      console.warn("⚠️ No user available at connect, skipping emit");
+    }
   });
 
     socket.on("connect_error",(error)=>{
