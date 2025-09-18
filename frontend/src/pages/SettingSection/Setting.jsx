@@ -37,7 +37,7 @@ const Setting = () => {
   return (
     <Layout>
       <div
-        className={`flex-h-screen ${
+        className={`flex h-screen ${
           theme === "dark"
             ? "bg-[rgb(17,27,33)] text-white"
             : "bg-white text-black"
