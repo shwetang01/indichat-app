@@ -170,7 +170,7 @@ const getAllUsers= async (req,res) =>{
     const loggedInUser = req.user.userId;
     try {
         const users= await User.find({_id:{$ne:loggedInUser}}).select(
-            "username profilePicture lastSeen isOnline about phoneNumber phoneSuffix "
+            "username profilePicture lastSeen isOnline about phoneNumber phoneSuffix"
         ).lean();
 
         const usersWithConversation = await Promise.all(
@@ -189,7 +189,7 @@ const getAllUsers= async (req,res) =>{
 
             })
         );
-        console.log(usersWithConversation)
+        // console.log(usersWithConversation)
 
         return response(res,200,'users retrive successfully',usersWithConversation);
     } catch (error) {

@@ -106,6 +106,7 @@ const VideocallModal = ({ socket }) => {
 
       console.log("Local media stream", stream.getTracks());
       setLocalStream(stream);
+      
       return stream;
 
     } catch (error) {
