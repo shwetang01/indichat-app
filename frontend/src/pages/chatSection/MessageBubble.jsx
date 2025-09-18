@@ -13,10 +13,6 @@ const MessageBubble = ({
   currentUser,
   deleteMessage,
 }) => {
-  // console.log("this is my message", message);
-  // console.log("Sender ID:", message.sender._id);
-  // console.log("Current User ID:", currentUser?._id);
-
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -25,21 +21,21 @@ const MessageBubble = ({
   const emojiPickerRef = useRef(null);
   const reactionsMenuRef = useRef(null);
 
-  // const isUserMessage = message.sender._id === currentUser?._id;
-  const senderId = message.sender?._id || message.sender;  
+  const senderId = message.sender?._id || message.sender;
   const isUserMessage = String(senderId) === String(currentUser?._id);
 
-  // using daisyui
-  const bubbleClass = isUserMessage ? "chat-end" : "chat-start";
+  //  LEFT / RIGHT alignment
+  const wrapperClass = isUserMessage ? "flex justify-end mb-6" : "flex justify-start mb-6";
 
+  //  Bubble styles
   const bubbleContentClass = isUserMessage
-    ? `chat-bubble md:max-w-[50%] min-w-[130px] ${
+    ? `rounded-lg px-3 py-2 md:max-w-[50%] min-w-[130px] shadow ${
         theme === "dark"
           ? "bg-[#144d38] text-white"
-          : "bg-[#d9fdd3] text-black "
+          : "bg-[#d9fdd3] text-black"
       }`
-    : `chat-bubble md:max-w-[50%] min-w-[130px] ${
-        theme === "dark" ? "bg-[#2c3e50] text-white" : "bg-gray-100 text-black "
+    : `rounded-lg px-3 py-2 md:max-w-[50%] min-w-[130px] shadow ${
+        theme === "dark" ? "bg-[#2c3e50] text-white" : "bg-gray-100 text-black"
       }`;
 
   const quickReactions = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -65,15 +61,12 @@ const MessageBubble = ({
   if (message === 0) return;
 
   return (
-
-    <div className={`chat ${bubbleClass} mb-6`}>
-      <div className={`${bubbleContentClass} relative group `} ref={messageRef}>
-        <div className=" flex justify-center gap-2">
+    <div className={wrapperClass}>
+      <div className={`${bubbleContentClass} relative group`} ref={messageRef}>
+        <div className="flex justify-center gap-2">
           {message.contentType === "text" && (
             <p className="mr-2">{message.content}</p>
           )}
-
-          
 
           {message.contentType === "image" && (
             <div>
@@ -96,12 +89,9 @@ const MessageBubble = ({
               <p className="mt-1">{message.content}</p>
             </div>
           )}
-
-
         </div>
 
-        
-
+        {/*  Time + status ticks */}
         <div className="self-end flex items-center justify-end gap-1 text-xs opacity-60 mt-2 ml-2">
           <span>{format(new Date(message.createdAt), "HH:mm")} </span>
 
@@ -118,27 +108,29 @@ const MessageBubble = ({
           )}
         </div>
 
-        <div className="absolute top-1 right-1 opqcity-0 group-hover:opacity-100 transition-opacity z-20">
+        {/* Options button */}
+        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
           <button
             className={`p-1 rounded-full ${
               theme === "dark" ? "text-white" : "text-gray-800"
-            } `}
+            }`}
             onClick={() => setShowOptions((prev) => !prev)}
           >
             <HiDotsVertical size={18} />
           </button>
         </div>
 
+        {/* Emoji button */}
         <div
           className={`absolute ${
             isUserMessage ? "-left-10" : "-right-10"
-          } top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2 `}
+          } top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2`}
         >
           <button
             onClick={() => setShowReactions(!showReactions)}
             className={`p-2 rounded-full ${
               theme === "dark" ? "bg-[#202c33]" : "bg-white hover:bg-gray-100"
-            }shadow-lg `}
+            } shadow-lg`}
           >
             <FaSmile
               className={`${
@@ -148,12 +140,13 @@ const MessageBubble = ({
           </button>
         </div>
 
+        {/* Quick reactions */}
         {showReactions && (
           <div
             ref={reactionsMenuRef}
             className={`absolute -top-8 ${
               isUserMessage ? "left-0" : "left-36"
-            } transform - translate-x-1/2 flex itmes-cente bg-[#202c33]/90 rounded-full px-2 py-1.5 gap-1 shadow-lg z-50`}
+            } transform -translate-x-1/2 flex items-center bg-[#202c33]/90 rounded-full px-2 py-1.5 gap-1 shadow-lg z-50`}
           >
             {quickReactions.map((emoji, index) => (
               <button
@@ -164,9 +157,9 @@ const MessageBubble = ({
                 {emoji}
               </button>
             ))}
-            <div className="w-[1px] h-5 bg-gray-600 mx-1 " />
+            <div className="w-[1px] h-5 bg-gray-600 mx-1" />
             <button
-              className="hover:bg-[#ffffff1a] rounded-full p-1 "
+              className="hover:bg-[#ffffff1a] rounded-full p-1"
               onClick={() => setShowEmojiPicker(true)}
             >
               <FaPlus className="h-4 w-4 text-gray-300" />
@@ -174,6 +167,7 @@ const MessageBubble = ({
           </div>
         )}
 
+        {/* Emoji picker */}
         {showEmojiPicker && (
           <div ref={emojiPickerRef} className="absolute left-0 mb-6 z-50">
             <div className="relative">
@@ -182,7 +176,7 @@ const MessageBubble = ({
                 theme={theme}
               />
               <button
-                className="absolute top-2 right-2 text-gray-500 "
+                className="absolute top-2 right-2 text-gray-500"
                 onClick={() => setShowEmojiPicker(false)}
               >
                 <RxCross2 />
@@ -191,12 +185,13 @@ const MessageBubble = ({
           </div>
         )}
 
+        {/* Reactions display */}
         {message.reactions && message.reactions.length > 0 && (
           <div
             className={`absolute -bottom-5 ${
               isUserMessage ? "right-2" : "left-2"
             } rounded-full px-2 shadow ${
-              theme === "dark" ? "bg-[#2a3942]" : " bg-gray-200"
+              theme === "dark" ? "bg-[#2a3942]" : "bg-gray-200"
             }`}
           >
             {message.reactions.map((reaction, index) => (
@@ -207,42 +202,41 @@ const MessageBubble = ({
           </div>
         )}
 
+        {/* Options dropdown */}
         {showOptions && (
           <div
             ref={optionRef}
-            className={`absolute top-8 right-1 z-50  w-36 rounded-xl py-2 twxt-sm shadow-lg ${
+            className={`absolute top-8 right-1 z-50 w-36 rounded-xl py-2 text-sm shadow-lg ${
               theme === "dark"
                 ? "bg-[#1d1f1f] text-white"
-                : " bg-gray-200 text-black"
+                : "bg-gray-200 text-black"
             }`}
           >
-            <button onClick={()=> {
-                if(message.contentType ==='text'){
-                  navigator.clipboard.writeText(message.content)
+            <button
+              onClick={() => {
+                if (message.contentType === "text") {
+                  navigator.clipboard.writeText(message.content);
                 }
-                setShowOptions(false)
-            }}
-            className="flex items-center w-full px-4 py-2 gap-3 rounded-lg"
+                setShowOptions(false);
+              }}
+              className="flex items-center w-full px-4 py-2 gap-3 rounded-lg"
             >
               <FaRegCopy size={14} />
               <span>Copy</span>
-
             </button>
 
             {isUserMessage && (
-                <button onClick={()=> {
-                deleteMessage(message?._id)
-                setShowOptions(false)              
-               
-            }}
-            className="flex items-center w-full px-4 py-2 gap-3 rounded-lg text-red-700"
-            >
-              <FaRegCopy className="text-red-700" size={14} />
-              <span>Delete</span>
-
-            </button>
+              <button
+                onClick={() => {
+                  deleteMessage(message?._id);
+                  setShowOptions(false);
+                }}
+                className="flex items-center w-full px-4 py-2 gap-3 rounded-lg text-red-700"
+              >
+                <FaRegCopy className="text-red-700" size={14} />
+                <span>Delete</span>
+              </button>
             )}
-
           </div>
         )}
       </div>
