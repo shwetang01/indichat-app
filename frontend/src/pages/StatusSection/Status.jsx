@@ -6,7 +6,7 @@ import Layout from "../../components/Layout";
 import StatusPreview from "./StatusPreview";
 import { motion } from "framer-motion";
 import { RxCross2 } from "react-icons/rx";
-import { FaCamera, FaEllipsisH, FaPlus } from "react-icons/fa";
+import { FaCamera, FaEllipsisH, FaPlus,FaTimes } from "react-icons/fa";
 import formatTimestamp from "../../utils/formatTime";
 import StatusList from "./StatusList";
 
@@ -186,7 +186,8 @@ const Status = () => {
 
         )}
 
-        <div className="overflow-y-auto h-[calc(100bh-64px]">
+        <div className="overflow-y-auto h-[calc(100vh-64px)]">
+
 
         <div className={`flex p-3 shadow-md space-x-4  ${
           theme === "dark"
@@ -223,7 +224,7 @@ const Status = () => {
                         strokeWidth="4"
                         strokeDasharray={`${segmentLength - 5} 5`}
                         strokeDashoffset={-offset}
-                        transform="rotate(-90 50 50)"
+                        transform={`rotate(-90 50 50)`}
                     />
                     );
                 })}
@@ -265,7 +266,10 @@ const Status = () => {
 
                 <p className={`${theme === 'dark' ? "text-gray-400" : "text-gray-600"}`}>
                 {userStatuses 
-                    ? `${userStatuses.statuses.length} status${userStatuses?.statuses.length > 1 ? "es" : ""} ${formatTimestamp()}`
+                    ? `${userStatuses.statuses.length} status${userStatuses?.statuses.length > 1 ? "es" : ""}
+                     ${formatTimestamp(
+                        userStatuses.statuses[userStatuses.statuses.length-1].timestamp
+                    )}`
                     : "tap to add status"}
                 </p>
 
@@ -358,15 +362,70 @@ const Status = () => {
 
             {showCreateModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className={`p-6 rounded-lg max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                    <h3 className={`text-lg font-semibold  mb-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                        Create Status
+                    </h3>
+
+                    {filePreview && (
+                           <div className="mb-4">
+                             {selectedFile?.type.startsWith("video/")?( <video 
+                               src= {filePreview}
+                               controls
+                               className="w-full h-32 object-cover rounded "
+                   
+                             /> )
+                             : (  <img
+                               src={filePreview}
+                               alt="file-preview"
+                              className="w-full h-32 object-cover rounded "
+                             /> ) }
+                    
+                           </div>
+                         )}
+
+                         <textarea
+                            value={newStatus}
+                            onChange={(e) => setNewStatus(e.target.value)}
+                            placeholder="What's on your mind?"
+                            className={`w-full p-3 border rounded-lg mb-4 ${theme === 'dark' ? 'bg-gray-700 text-white border-gray-500' : 'bg-white text-black border-gray-300'}`}
+                            rows={3}
+                            />
+
+                            <input
+                            type="file"
+                            accept="image/*,video/*"
+                            onChange={handleFileChange}
+                            className="mb-4"
+                            />
+
+                         <div className="flex justify-end space-x-3">
+                            <button onClick={()=>{
+                                setShowCreateModal(false)
+                                setNewStatus("")
+                                setSelectedFile(null)
+                                setFilePreview(null)
+                            }}
+                                disabled ={loading}
+                                className="px-4 py-2 text-gray-500 hover:text-gray-700"                            
+                            >
+                                Cancel
+                            </button>
+
+
+                            <button onClick={
+                                handleCreateStatus}
+                                disabled ={loading ||(!newStatus.trim() && !selectedFile )}
+                                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"                            
+                            >
+                           {loading ? "Creating..." :"Create"}
+                            </button>
+
+                         </div>
+
+                    </div>
                 </div>
-            )}
-
-
-
-
-
-
-      
+            )}   
 
     </motion.div>
 
