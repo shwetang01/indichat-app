@@ -95,6 +95,7 @@ fetchStatuses : async () => {
             : [data.data, ...state.statuses]
         }))
         }
+        set({loading:false})
             return data.data;
 
     } catch (error) {
@@ -108,15 +109,16 @@ fetchStatuses : async () => {
 // view status
     viewStatus : async(statusId) =>{
         try {
+           set({ loading: true, error: null });
           await axiosInstance.put(`status/${statusId}/view`);
             set((state) => ({
             statuses: state.statuses.map((status) => 
          status._id === statusId ? {...status} : status 
          ),
          }));
-       
+         set({loading:false})
         } catch (error) {
-            set({error:error.message})
+            set({error:error.message,loading:false})
         }
     },
 
@@ -128,7 +130,7 @@ fetchStatuses : async () => {
           statuses: state.statuses.filter((s) => s._id !== statusId),
        
          }));
-
+         set({loading:false})
 
         } catch (error) {
              console.error("Error deleting status", error);
@@ -140,8 +142,10 @@ fetchStatuses : async () => {
 
     getStatusViewers : async (statusId) =>{
         try {
+           set({ loading: true, error: null });
              set({ loading: true, error: null });
              const {data} = await axiosInstance.get(`/status${statusId}/viewers`)
+             set({loading:false})
             return data.data;
         } catch (error) {
              console.error("Error getting status viewers", error);
@@ -186,7 +190,7 @@ getGroupedStatus : () => {
 getOtherStatuses : (userId) => {
   const groupedStatus = get().getGroupedStatus();
   return Object.values(groupedStatus).filter(
-    (contact) => contact._id !== userId
+    (contact) => contact.id !== userId
   );
 },
 

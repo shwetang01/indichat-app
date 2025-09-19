@@ -151,6 +151,7 @@ const Status = () => {
                 onDelete={handleDeleteStatus}
                 theme={theme}
                 currentUser={user}
+                loading ={loading}
                 
                 />
             )
