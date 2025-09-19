@@ -204,33 +204,33 @@ const Status = () => {
                 alt={user?.username}
                     className="w-12 h-12 rounded-full object-cover "
                 />
-            {userStatuses ?(
+            {userStatuses ? (
                 <>
-                <svg
-                className="absolute top-0 left-0 w-12 h-12"
-                viewBox="0 0 100 100"
-                >
-                {userStatuses.statuses.map((_, index) => {
-                    const circumference = 2 * Math.PI * 48;
-                    const segmentLength = circumference / userStatuses.statuses.length;
-                    const offset = index * segmentLength;
-                    return (
-                    <circle
-                        key={index}
-                        cx="50"
-                        cy="50"
-                        r="48"
-                        fill="none"
-                        stroke="#25D366"
-                        strokeWidth="4"
-                        strokeDasharray={`${segmentLength - 5} 5`}
-                        strokeDashoffset={-offset}
-                        transform={`rotate(-90 50 50)`}
-                    />
-                    );
-                })}
+                    <svg
+                    className="absolute top-0 left-0 w-12 h-12"
+                    viewBox="0 0 100 100"
+                    >
+                    {userStatuses.statuses.map((_, index) => {
+                        const circumference = 2 * Math.PI * 48;
+                        const segmentLength = circumference / userStatuses.statuses.length;
+                        const offset = index * segmentLength;
+                        return (
+                        <circle
+                            key={index}
+                            cx="50"
+                            cy="50"
+                            r="48"
+                            fill="none"
+                            stroke="#25D366"
+                            strokeWidth="4"
+                            strokeDasharray={`${segmentLength - 5} 5`}
+                            strokeDashoffset={-offset}
+                            transform={`rotate(-90 50 50)`}
+                        />
+                        );
+                    })}
 
-                </svg>
+                    </svg>
                 <button 
                     className="absolute bottom-0 right-0 bg-green-500 text-white p-1 rounded-full" 
                     onClick={(e) => {
@@ -261,13 +261,15 @@ const Status = () => {
             )}
 
             </div>
+
              <div className="flex flex-col items-start flex-1">
                 <p className="font-semibold">
                     My Status</p>
 
-                <p className={`${theme === 'dark' ? "text-gray-400" : "text-gray-600"}`}>
+                <p className={`${theme === 'dark' ? "text-gray-400" : "text-gray-600"}`}
+                >
                 {userStatuses 
-                    ? `${userStatuses.statuses.length} status${userStatuses?.statuses.length > 1 ? "es" : ""}
+                    ? `${userStatuses.statuses.length} status${userStatuses?.statuses.length > 1 ? "." : ""}
                      ${formatTimestamp(
                         userStatuses.statuses[userStatuses.statuses.length-1].timestamp
                     )}`

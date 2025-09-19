@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from 'react'
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import formatTimestamp from '../../utils/formatTime';
-import { FaTrash } from 'react-icons/fa';
+import { FaChevronCircleLeft, FaChevronCircleRight, FaChevronDown, FaEye, FaTimes, FaTrash } from 'react-icons/fa';
 
 const StatusPreview = ({contact,currentIndex,onClose,onPrev,onNext,onDelete,theme,currentUser,loading}) => {
     const [progress, setProgress] = useState(0);
@@ -48,11 +48,12 @@ if (!currentStatus) return null;
   
   
   return (
-    <motion.div  initial={{ opacity: 0 }}
+    <motion.div  
+        initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
         exit={{opacity:0}}
-        className={`fixed inset-0 w-full h-full bg-black z-50 flex items-center justify-center 
+        className={`fixed inset-0 w-full h-full bg-black bg-opacity-90 z-50 flex items-center justify-center 
         `}
           style={{ backdropFilter: "blur(5px)" }}
           onClick={onClose}
@@ -91,7 +92,7 @@ if (!currentStatus) return null;
                   <p className='text-gray-300 text-sm'>{formatTimestamp(currentStatus.timestamp)}</p>
                 </div>
               </div>
-            </div>
+            
 
     {/*status action  */}
        {isOwnerStatus && (
@@ -104,6 +105,7 @@ if (!currentStatus) return null;
             </button>
           </div>
         )}
+        </div>
 
         <div className='w-full h-full flex items-center justify-center'>
           {currentStatus.contentType === 'text' ? (
@@ -129,13 +131,100 @@ if (!currentStatus) return null;
         </div>
 
 
-        </div>
+          <button onClick={onClose}
+            className='absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-3 hover:bg-opacity-70 transition-all z-10'
+          >
+            <FaTimes className='h-5 w-5' />
+          
+          </button>
+
+          {currentIndex > 0 && (
+               <button onClick={onPrev}
+            className='absolute top-1/2 left-4 transition -translate-y-1/2  text-white bg-black bg-opacity-50 rounded-full p-3 hover:bg-opacity-70 '
+          >
+            <FaChevronCircleLeft className='h-5 w-5' />
+          
+          </button>
+
+          )}
+
+           {currentIndex < contact.statuses.length-1  && (
+               <button onClick={onNext}
+            className='absolute top-1/2 right-4 transition -translate-y-1/2  text-white bg-black bg-opacity-50 rounded-full p-3 hover:bg-opacity-70 '
+          >
+            <FaChevronCircleRight className='h-5 w-5' />
+          
+          </button>
+          )}
+
+          {isOwnerStatus && (
+          <div className="absolute bottom-4 left-4 right-4">
+            <button
+              onClick={handleViewersToggle}
+              className="flex items-center justify-between w-full text-white bg-black bg-opacity-50 rounded-lg px-4 py-2 hover:bg-opacity-70"
+            >
+              <div className="flex items-center space-x-2">
+                <FaEye className="w-4 h-4" />
+                <span>{currentStatus?.viewers.length}</span>
+              </div>
+              <FaChevronDown
+                className={`h-4 w-4 transition-transform ${showViewers ? "rotate-180" : ""}`}
+              />
+            </button>
+
+           <AnimatePresence>
+  {showViewers && (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      className="mt-2 rounded-lg max-h-40 overflow-y-auto"
+    >
+      {loading ? (
+        <p className="text-white text-center">Loading Viewers...</p>
+      ) : (
+        (() => {
+          const filteredViewers = currentStatus?.viewers?.filter(
+            (viewer) => viewer._id !== currentUser?._id
+          );
+
+          return filteredViewers?.length > 0 ? (
+            <div className="space-y-2">
+              {filteredViewers.map((viewer) => (
+                <div
+                  key={viewer?._id}
+                  className="flex items-center space-x-3"
+                >
+                  <img
+                    src={viewer.profilePicture}
+                    alt={viewer.username}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <span>{viewer.username}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center">No Viewers Yet</p>
+          );
+        })()
+      )}
+    </motion.div>
+  )}
+</AnimatePresence>
+
 
 
           </div>
+        )}
+        
 
+
+
+        </div>
+      </div>
         </motion.div>
-  )
-}
+  );
+};
 
 export default StatusPreview;
