@@ -15,7 +15,7 @@ export const initializeSocket = ()=>{
 
     socket = io (BACKEND_URL,{
         withCredentials:true,
-        transports:["websocket", "polling"],
+        transports: ["websocket", "polling"],
         reconnectionAttempts:5,
         reconnectionDelay:1000,
     });
@@ -23,14 +23,8 @@ export const initializeSocket = ()=>{
     // connections event
 
     socket.on("connect", () => {
-    console.log("socket connected", socket.id);
-
-    // const user = useUserStore.getState().user;
-    if (user && user._id) {
+    console.log("socket connected", socket.id); 
       socket.emit("user_connected", user._id);
-    } else {
-      console.warn("⚠️ No user available at connect, skipping emit");
-    }
   });
 
     socket.on("connect_error",(error)=>{

@@ -77,7 +77,7 @@ const initializeSocket = (server)=>{
 
             } catch (error) {
                 console.error("Error sending messages",error)
-                socket.emit("sessage_error",{error:"Failed to send message"})
+                socket.emit("message_error",{error:"Failed to send message"})
  
             }
         })
@@ -86,7 +86,7 @@ const initializeSocket = (server)=>{
         socket.on("message_read",async({messageIds,senderId})=>{
             try {
                 await Message.updateMany(
-                    {_id:{$in:messageIds}},
+                    {_id: {$in:messageIds}},
                     {$set: {messageStatus:"read"}}
 
                 )
@@ -244,7 +244,7 @@ const initializeSocket = (server)=>{
                     lastSeen: new Date(),
                 })
 
-                socket.leave(userId),
+                socket.leave(userId);
                 console.log(`user ${userId} disconnected`)
 
 
