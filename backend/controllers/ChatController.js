@@ -10,16 +10,16 @@ try {
     const {senderId,receiverId,content,messageStatus} =  req.body;
     const file = req.file;
 
-    const participants = [senderId,receiverId].sort();
+    const participants = [senderId, receiverId].sort();
    
     // check if conversation alredy exist
     let conversation = await Conversation.findOne({
-        participants:participants
+        participants:participants,
     });
     
     if(!conversation){
         conversation= new Conversation({
-            participants
+            participants,
         });
         await conversation.save();
     }
@@ -166,18 +166,18 @@ exports.getMessages = async(req,res) =>{
 
 // mark as read api
 exports.markAsRead = async(req,res)=>{
-    const {messageId}= req.body;
+    const {messageIds}= req.body;
     const userId = req.user.userId;
 
     try {
         // get relevant messages to detrmine senders
         let messages = await Message.find({
-            _id:{$in :messageId},
-            receiver:userId,
+            _id: {$in :messageIds},
+            receiver: userId,
         })
         
         await Message.updateMany(
-            { _id: {$in :messageId},receiver :userId},
+            { _id: {$in :messageIds},receiver :userId},
             { $set: {messageStatus:"read"}}
             
         );

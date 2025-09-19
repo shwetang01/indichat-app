@@ -95,7 +95,7 @@ const initializeSocket = (server)=>{
                     messageIds.forEach((messageId)=>{
                         io.to(senderSocketId).emit("message_status_update",{
                             messageId,
-                            messageStatus: "read"
+                            messageStatus:"read"
                         })
                     })
                 }
