@@ -88,11 +88,11 @@ const Status = () => {
   }
 }
 
-    const handleViewStatus = async (statusId) => {
+    const handleViewStatus = async(statusId) => {
     await viewStatus(statusId);
     };
 
-    const handleDeleteStatus = async (statusId) => {
+    const handleDeleteStatus = async(statusId) => {
         try {
             await deleteStatus(statusId);
             setShowOption(false);
@@ -122,7 +122,7 @@ const Status = () => {
   setCurrentStatusIndex((prev) => Math.max(prev - 1, 0));
     };
 
-    const handleStatusPreview = (contact, statusIndex) => {
+    const handleStatusPreview = (contact, statusIndex=0) => {
     setPreviewContact(contact);
     setCurrentStatusIndex(statusIndex);
 
