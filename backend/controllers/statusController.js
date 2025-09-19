@@ -21,9 +21,9 @@ try {
         };
 
         mediaUrl = uploadFile?.secure_url;
-        if(file.mimetype.startswith('image')){
+        if(file.mimetype.startsWith('image')){
             finalContentType="image"
-        }else  if(file.mimetype.startswith('video')){
+        }else  if(file.mimetype.startsWith('video')){
             finalContentType="video"
         }else{
             return response(res,400,'Unsupported file type');
@@ -68,7 +68,7 @@ try {
 
 } catch (error) {
      console.error(error);
-    return response(res,500,'Internal sarver error');
+    return response(res,500,'Internal server error');
         
 }
 };

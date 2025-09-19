@@ -26,12 +26,12 @@ const StatusList = ({ contact, onPreview, theme }) => {
               fill="none"
               stroke="#25D366"
               strokeWidth="4"
-              transform="rotate(-90 50 50)"
+              transform={`rotate(-90 50 50)`}
             />
           ))}
         </svg>
       </div>
-
+        <div>
       <p className="font-semibold mt-1">{contact?.name}</p>
       <p
         className={`text-sm ${
@@ -42,6 +42,8 @@ const StatusList = ({ contact, onPreview, theme }) => {
           contact.statuses[contact.statuses.length - 1].timestamp
         )}
       </p>
+        </div>
+
     </div>
   );
 };

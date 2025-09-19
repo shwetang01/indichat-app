@@ -1,6 +1,7 @@
 import React,{useState,useEffect} from 'react'
 import { motion } from 'framer-motion';
 import formatTimestamp from '../../utils/formatTime';
+import { FaTrash } from 'react-icons/fa';
 
 const StatusPreview = ({contact,currentIndex,onClose,onPrev,onNext,onDelete,theme,currentUser,loading}) => {
     const [progress, setProgress] = useState(0);
@@ -93,11 +94,43 @@ if (!currentStatus) return null;
             </div>
 
     {/*status action  */}
+       {isOwnerStatus && (
+          <div className='flex items-center space-x-2'>
+            <button
+              onClick={handleDeleteStatus}
+              className='text-white bg-red-500 bg-opacity-70 rounded-full p-2 hover:bg-opacity-90 transition-all'
+            >
+              <FaTrash className='h-4 w-4' />
+            </button>
+          </div>
+        )}
 
-
-
-
+        <div className='w-full h-full flex items-center justify-center'>
+          {currentStatus.contentType === 'text' ? (
+            <div className='text-white text-center p-8'>
+              <p className='text-2xl font-medium'>{currentStatus.media}</p>
             </div>
+          ) : currentStatus.contentType === 'image' ? (
+            <img
+              src={currentStatus.media}
+              alt='image'
+              className='max-w-full max-h-full object-contain'
+            />
+          ) : currentStatus.contentType === 'video' ? (
+            <video
+              src={currentStatus.media}
+             
+              controls
+              muted
+              autoPlay
+              className='max-w-full max-h-full object-contain'
+            />
+          ) : null}
+        </div>
+
+
+        </div>
+
 
           </div>
 
@@ -105,4 +138,4 @@ if (!currentStatus) return null;
   )
 }
 
-export default StatusPreview
+export default StatusPreview;

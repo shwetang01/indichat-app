@@ -144,7 +144,7 @@ fetchStatuses : async () => {
         try {
            set({ loading: true, error: null });
              set({ loading: true, error: null });
-             const {data} = await axiosInstance.get(`/status${statusId}/viewers`)
+             const {data} = await axiosInstance.get(`/status/${statusId}/viewers`)
              set({loading:false})
             return data.data;
         } catch (error) {
@@ -168,7 +168,7 @@ getGroupedStatus : () => {
             name: status?.user?.username,
             avatar: status?.user?.profilePicture,
             statuses: []
-             }
+             };
         }
 
     acc[statusUserId].statuses.push({
