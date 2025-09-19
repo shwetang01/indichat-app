@@ -72,7 +72,7 @@ const initializeSocket = (server)=>{
             try { 
                 const receiverSocketId = onlineUsers.get(message.receiver?._id);
                 if(receiverSocketId){
-                    io.to(receiverSocketId).emit("receive_messages",message)
+                    io.to(receiverSocketId).emit("receive_message",message)
                 }
 
             } catch (error) {
