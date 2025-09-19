@@ -165,7 +165,7 @@ if (!currentStatus) return null;
             >
               <div className="flex items-center space-x-2">
                 <FaEye className="w-4 h-4" />
-                <span>{currentStatus?.viewers.length}</span>
+                <span>{currentStatus?.viewers.length-1}</span>
               </div>
               <FaChevronDown
                 className={`h-4 w-4 transition-transform ${showViewers ? "rotate-180" : ""}`}
