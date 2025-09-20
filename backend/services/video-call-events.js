@@ -71,12 +71,12 @@ const handleVideoCallEvent = (socket, io, onlineUsers) => {
     });
 
     // WebRTC signaling - answer
-    socket.on("webrtc_answer", ({ offer, receiverId, callId }) => {
+    socket.on("webrtc_answer", ({ answer, receiverId, callId }) => {
         const receiverSocketId = onlineUsers.get(receiverId);
 
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("webrtc_answer", {
-                offer,
+                answer,
                 senderId: socket.userId,
                 callId
             });
