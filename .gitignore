@@ -1,1 +1,7 @@
-.env
+backend/.env/
+frontend/.env/
+
+frontend/.next/
+frontend/out/
+frontend/dist/
+backend/dst/
