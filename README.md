@@ -1,4 +1,4 @@
-# Chat App Backend
+# Chat App 
 
 A full-featured **chat application backend** built from scratch using Node.js. It supports user authentication, real-time messaging, and basic user status management.
 
