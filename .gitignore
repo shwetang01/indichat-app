@@ -5,3 +5,5 @@ frontend/.next/
 frontend/out/
 frontend/dist/
 backend/dst/
+
+.env
