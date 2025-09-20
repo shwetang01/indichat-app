@@ -125,7 +125,7 @@ export const useChatStore = create((set,get)=>({
                             return {onlineUsers: newOnlineUsers}
 
                         })
-                    })
+                    });
                 }
 
 

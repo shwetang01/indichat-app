@@ -152,7 +152,13 @@ const Login = () => {
         );
       }
       if (response.status === "success") {
+        
         toast.success("Otp verify successfully");
+
+        const token = response.data?.token;
+        localStorage.setItem("auth_token",token)
+        
+        console.log(response);
         const user = response.data?.user;
         if (user?.username && user?.profilePicture) {
           setUser(user);

@@ -88,6 +88,7 @@ const verifyOtp = async(req,res)=>{
             await user.save();
 
         }
+
         const token= generateToken(user?._id);
         res.cookie("auth_token",token,{
             httpOnly:true,
@@ -98,7 +99,7 @@ const verifyOtp = async(req,res)=>{
      } catch (error) {
         console.error(error);
         return response(res,500,'Internal sarver error');
-     }
+    }
 
 
 

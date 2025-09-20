@@ -2,6 +2,7 @@ const {Server} = require('socket.io');
 const Message = require("../models/Message");
 const User = require('../models/User');
 const handleVideoCallEvent = require('./video-call-events');
+const socketMiddleware = require('../middleware/socketMiddleware');
 
 
 
@@ -22,6 +23,10 @@ const initializeSocket = (server)=>{
         pingTimeout: 60000,  //disconnect inactive users or sockrt after 1 min= 60 seconds
 
     });
+
+    // middleware
+    io.use(socketMiddleware);
+
 
     // when  new socket connectrion is established
     io.on("connection",(socket)=>{
