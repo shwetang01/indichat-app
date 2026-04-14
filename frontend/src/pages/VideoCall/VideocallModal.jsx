@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo, use } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 
 import useUserStore from "../../store/useUserStore";
 import useThemeStore from "../../store/themeStore";
@@ -44,19 +44,40 @@ const VideocallModal = ({ socket }) => {
   const { user } = useUserStore();
   const { theme } = useThemeStore();
 
+  // const rtcConfiguration = {
+  //   iceServers: [
+  //     {
+  //       urls: "stun:stun.l.google.com:19302",
+  //     },
+  //     {
+  //       urls: "stun:stun1.l.google.com:19302",
+  //     },
+  //     {
+  //       urls: "stun:stun2.l.google.com:19302",
+  //     },
+  //   ],
+  // };
+
   const rtcConfiguration = {
-    iceServers: [
-      {
-        urls: "stun:stun.l.google.com:19302",
-      },
-      {
-        urls: "stun:stun1.l.google.com:19302",
-      },
-      {
-        urls: "stun:stun2.l.google.com:19302",
-      },
-    ],
-  };
+  iceServers: [
+    // STUN (keep)
+    {
+      urls: "stun:stun.l.google.com:19302",
+    },
+
+    // TURN (ADD THIS — REQUIRED for real connections)
+    {
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+  ],
+};
 
   // Memorize display the user info and it is prevent the unnecessary re-render
   const displayInfo = useMemo(() => {
@@ -298,58 +319,108 @@ const VideocallModal = ({ socket }) => {
       endCall();
     };
 
+    // const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
+    //   if (!peerConnection) return;
+
+    //   try {
+    //     await peerConnection.setRemoteDescription(
+    //       new RTCSessionDescription(offer)
+    //     );
+
+    //     //process queued ICE candidate
+    //     await processQueuedIceCandidates();
+
+    //     //create answer
+    //     const answer = await peerConnection.createAnswer();
+    //     await peerConnection.setLocalDescription(answer);
+
+    //     socket.emit("webrtc_answer", {
+    //       answer,
+    //       receiverId: senderId,
+    //       callId,
+    //     });
+
+    //     console.log("Receiver: Answer send waiting for ice candidates");
+    //   } catch (error) {
+    //     console.error("Receiver offer error", error);
+    //   }
+    // };
+
     const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
-      if (!peerConnection) return;
+  let pc = peerConnection;
 
-      try {
-        await peerConnection.setRemoteDescription(
-          new RTCSessionDescription(offer)
-        );
+  try {
+    // 🔥 create peer connection if not exists
+    if (!pc) {
+      const stream = await initializeMedia(callType === "video");
+      pc = createPeerConnection(stream, "RECEIVER");
+    }
 
-        //process queued ICE candidate
-        await processQueuedIceCandidates();
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
 
-        //create answer
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
+    // process queued ICE candidates
+    await processQueuedIceCandidates();
 
-        socket.emit("webrtc_answer", {
-          answer,
-          receiverId: senderId,
-          callId,
-        });
+    // create answer
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
 
-        console.log("Receiver: Answer send waiting for ice candidates");
-      } catch (error) {
-        console.error("Receiver offer error", error);
-      }
-    };
+    socket.emit("webrtc_answer", {
+      answer,
+      receiverId: senderId,
+      callId,
+    });
+
+    console.log("✅ Receiver: Answer sent");
+  } catch (error) {
+    console.error("❌ Receiver offer error", error);
+  }
+};
 
     //Receiver answer (caller)
-    const handleWebRTCAnswer = async (answer, senderId, callId) => {
-      if (!peerConnection) return;
+    // const handleWebRTCAnswer = async ({answer, senderId, callId}) => {
+    //   if (!peerConnection) return;
 
-      if (peerConnection.signalingState === "closed") {
-        console.log("Caller: Peer connection is closed");
-        return;
-      }
+    //   if (peerConnection.signalingState === "closed") {
+    //     console.log("Caller: Peer connection is closed");
+    //     return;
+    //   }
 
-      try {
-        // current caller signing
-        await peerConnection.setRemoteDescription(
-          new RTCSessionDescription(answer)
-        );
+    //   try {
+    //     // current caller signing
+    //     await peerConnection.setRemoteDescription(
+    //       new RTCSessionDescription(answer)
+    //     );
 
-        // process queued ICE candidate
-        await processQueuedIceCandidates();
+    //     // process queued ICE candidate
+    //     await processQueuedIceCandidates();
 
-        // check receiver
-        const receivers = peerConnection.getReceivers();
-        console.log("Receiver", receivers);
-      } catch (error) {
-        console.error("caller answer error", error);
-      }
-    };
+    //     // check receiver
+    //     const receivers = peerConnection.getReceivers();
+    //     console.log("Receiver", receivers);
+    //   } catch (error) {
+    //     console.error("caller answer error", error);
+    //   }
+    // };
+
+    const handleWebRTCAnswer = async ({ answer, senderId, callId }) => {
+  if (!peerConnection) {
+    console.log("❌ No peerConnection on caller");
+    return;
+  }
+
+  try {
+    await peerConnection.setRemoteDescription(
+      new RTCSessionDescription(answer)
+    );
+
+    await processQueuedIceCandidates();
+
+    console.log("✅ Caller: Answer received & set");
+  } catch (error) {
+    console.error("❌ caller answer error", error);
+  }
+};
 
     //Receiver ICE candidates
     const handleWebRTCIceCandidates = async ({ candidate, senderId }) => {
