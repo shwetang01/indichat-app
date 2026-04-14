@@ -1,8 +1,5 @@
-const sgMail = require('@sendgrid/mail');
-const dotenv = require('dotenv');
-dotenv.config();
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const axios = require("axios");
+require("dotenv").config();
 
 const sendOtpToEmail = async (email, otp) => {
   const html = `
@@ -22,19 +19,30 @@ const sendOtpToEmail = async (email, otp) => {
   `;
 
   try {
-    const result = await sgMail.send({
-      to: email,
-      from: process.env.SENDGRID_VERIFIED_EMAIL, // This must be a verified sender email
-      subject: 'Indichat App Verification Code',
-      html,
-    });
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "IndiChat App",
+          email: process.env.BREVO_VERIFIED_SENDER, // Must be a verified sender in Brevo
+        },
+        to: [{ email }],
+        subject: "Indichat App Verification Code",
+        htmlContent: html,
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log(`✅ OTP email sent to ${email}`);
-    return { success: true, result };
-
+    return { success: true, response: response.data };
   } catch (error) {
-    console.error('❌ Error sending OTP email:', error?.response?.body || error.message || error);
-    return { success: false, error };
+    console.error("❌ Failed to send OTP via Brevo:", error.response?.data || error.message);
+    return { success: false, error: error.response?.data || error.message };
   }
 };
 
