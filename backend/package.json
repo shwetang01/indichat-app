@@ -25,6 +25,7 @@
     "multer": "^2.0.2",
     "nodemon": "^3.1.10",
     "resend": "^6.1.2",
+    "sib-api-v3-sdk": "^8.5.0",
     "socket.io": "^4.8.1",
     "twilio": "^5.8.0"
   }
