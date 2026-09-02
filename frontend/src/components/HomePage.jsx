@@ -1,47 +1,41 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react';
 import Layout from './Layout';
 import { motion } from 'framer-motion';
 import ChatList from '../pages/chatSection/ChatList';
 import { getAllUsers } from '../services/user.service';
-import useLayoutStore from '../store/layoutStore';
+import { useChatStore } from '../store/chatStore';
 
 const HomePage = () => {
+  const { contacts, setContacts, initUsersStatus } = useChatStore();
 
-  // const setSelectedContact =useLayoutStore( (state) =>state.setSelectedContact);
-  // const location = useLocation();
-  const [allUsers,setAllUsers]=useState([]);
-  const getAllUser = async()=>{
+  const getAllUser = async () => {
     try {
-      const result= await getAllUsers();
-      if(result.status === 'success'){
-        setAllUsers(result.data);
+      const result = await getAllUsers();
+      if (result.status === 'success' && Array.isArray(result.data)) {
+        setContacts(result.data);
+        initUsersStatus(result.data);
       }
     } catch (error) {
-      console.log(error)
-      
+      console.error("Error fetching all users:", error);
     }
-  }
+  };
 
-  useEffect(()=> {
+  useEffect(() => {
     getAllUser();
-
-  },[]) 
- 
-
+  }, []);
 
   return (
     <Layout>
       <motion.div
-      initial ={{opacity :0}}
-      animate ={{opacity:1}}
-      transition={{duration: 0.5}}
-      className ='h-full'
-    >
-      <ChatList contacts={allUsers}  />
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="h-full"
+      >
+        <ChatList contacts={contacts} />
       </motion.div>
-
     </Layout>
-  )
-}
+  );
+};
 
 export default HomePage;

@@ -6,6 +6,7 @@ const twilloService = require('../services/twilloServices');
 const generateToken = require("../utils/generateToken");
 const { uploadFileToCloudinary } = require("../config/cloudinaryConfig");
 const Conversation = require('../models/Conversation');
+const Message = require('../models/Message');
 
 // Step 1: Send OTP
 const sendOtp = async (req, res) => {
@@ -191,8 +192,17 @@ const getAllUsers = async (req, res) => {
                     participants: { $all: [loggedInUser, user?._id] }
                 }).populate({
                     path: "lastMessage",
-                    select: 'content createdAt sender receiver'
+                    select: 'content createdAt sender receiver messageStatus imageOrVideoUrl contentType'
                 }).lean();
+
+                if (conversation) {
+                    const unreadCount = await Message.countDocuments({
+                        conversation: conversation._id,
+                        receiver: loggedInUser,
+                        messageStatus: { $in: ["send", "delivered"] }
+                    });
+                    conversation.unreadCount = unreadCount;
+                }
 
                 return {
                     ...user,
@@ -200,6 +210,21 @@ const getAllUsers = async (req, res) => {
                 };
             })
         );
+
+        // Sort: newest message first, followed by contacts without messages
+        usersWithConversation.sort((a, b) => {
+            const aTime = a.conversation?.lastMessage?.createdAt
+                ? new Date(a.conversation.lastMessage.createdAt).getTime()
+                : a.conversation?.updatedAt
+                ? new Date(a.conversation.updatedAt).getTime()
+                : 0;
+            const bTime = b.conversation?.lastMessage?.createdAt
+                ? new Date(b.conversation.lastMessage.createdAt).getTime()
+                : b.conversation?.updatedAt
+                ? new Date(b.conversation.updatedAt).getTime()
+                : 0;
+            return bTime - aTime;
+        });
 
         return response(res, 200, 'Users retrieved successfully', usersWithConversation);
 

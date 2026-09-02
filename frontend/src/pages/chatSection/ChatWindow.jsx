@@ -3,6 +3,7 @@ import useThemeStore from "../../store/themeStore";
 import useUserStore from "../../store/useUserStore";
 import { useChatStore } from "../../store/chatStore";
 import { isToday, isYesterday, format } from "date-fns";
+import formatTimestamp, { formatLastSeen } from "../../utils/formatTime";
 import chatappImage from "../../images/chatapp_image.png";
 import {
   FaArrowLeft,
@@ -19,7 +20,6 @@ import useLayoutStore from "../../store/layoutStore";
 import { object } from "yup";
 import MessageBubble from "./MessageBubble";
 import EmojiPicker from "emoji-picker-react";
-import VideoCallManager from "../VideoCall/VideoCallManager";
 import { getSocket } from "../../services/chat.service";
 import useVideoCallStore from "../../store/videoCallStore";
 
@@ -55,33 +55,47 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
     stopTyping,
     getUserLastSeen,
     isUserOnline,
+    checkUserStatus,
     cleanup,
     addReaction,
     currentConversation,
+    setCurrentConversation,
     deleteMessage,
   } = useChatStore();
 
-  // get last seen and online
-  const online = isUserOnline(selectedContact?._id);
-  const lastSeen = getUserLastSeen(selectedContact?._id);
+  // get last seen and online with fallback
+  const online = isUserOnline(selectedContact?._id) || selectedContact?.isOnline;
+  const lastSeen = getUserLastSeen(selectedContact?._id) || selectedContact?.lastSeen;
   const isTyping = isUserTyping(selectedContact?._id);
 
+  // Check live status on contact change
   useEffect(() => {
-    if (selectedContact?._id && conversations?.data?.length > 0) {
-      const conversation = conversations?.data?.find((conv) =>
-        conv.participants.some(
-          (participant) => participant._id === selectedContact?._id
-        )
-      );
-      if (conversation?._id) {
-        fetchMessages(conversation._id);
+    if (selectedContact?._id) {
+      checkUserStatus(selectedContact._id);
+    }
+  }, [selectedContact?._id, checkUserStatus]);
+
+  useEffect(() => {
+    if (selectedContact?._id) {
+      const directConvId = selectedContact.conversation?._id;
+      if (directConvId) {
+        fetchMessages(directConvId);
+      } else if (conversations?.data?.length > 0) {
+        const conversation = conversations?.data?.find((conv) =>
+          conv.participants.some(
+            (participant) => (participant._id || participant) === selectedContact?._id
+          )
+        );
+        if (conversation?._id) {
+          fetchMessages(conversation._id);
+        }
       }
     }
-  }, [selectedContact, conversations]);
+  }, [selectedContact, conversations, fetchMessages]);
 
   useEffect(() => {
     fetchConversations();
-  }, []);
+  }, [fetchConversations]);
 
   const scrollToBottom = () => {
     messageEndRef.current?.scrollIntoView({ behavior: "auto" });
@@ -261,7 +275,6 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
   }
 
   return (
-    <> 
     <div className="h-screen w-full flex-1 flex flex-col">
       <div
         className={`p-4 ${
@@ -272,7 +285,10 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
       >
         <button
           className="mr-2 focus:outline-none"
-          onClick={() => setSelectedContact(null)}
+          onClick={() => {
+            setCurrentConversation(null);
+            setSelectedContact(null);
+          }}
         >
           <FaArrowLeft className="h-6 w-6" />
         </button>
@@ -289,18 +305,21 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
           </h2>
 
           {isTyping ? (
-            <div>Typing... </div>
+            <div className="text-sm text-green-500 font-medium animate-pulse">Typing...</div>
           ) : (
             <p
               className={`text-sm ${
                 theme === "dark" ? "text-gray-400" : "text-gray-500"
               }`}
             >
-              {online
-                ? "online"
-                : lastSeen
-                ? `Last seen ${format(new Date(lastSeen), "HH:mm")}`
-                : "offline"}
+              {online ? (
+                <span className="text-green-500 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
+                  online
+                </span>
+              ) : (
+                formatLastSeen(lastSeen)
+              )}
             </p>
           )}
         </div>
@@ -464,17 +483,10 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
               } `}
         />
         <button onClick={handleSendMessage} className="focus:outline-none">
-              <FaPaperPlane  className="h-6 w-6 text-blue-500" />
-
+          <FaPaperPlane className="h-6 w-6 text-blue-500" />
         </button>
-
-
       </div>
     </div>
-
-      <VideoCallManager socket={socket} />
-
-</>
   );
 };
 
