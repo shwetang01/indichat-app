@@ -3,48 +3,48 @@ import useUserStore from '../store/useUserStore';
 
 let socket = null;
 
-const token = localStorage.getItem("auth_token")
-
 export const initializeSocket = ()=>{
-    if(socket) return socket;
-
-
-
     const user = useUserStore.getState().user;
+    if(!user?._id) return null;
 
-    const BACKEND_URL = process.env.REACT_APP_API_URL;
+    const token = localStorage.getItem("auth_token");
+    const BACKEND_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+    if(socket){
+        if(!socket.connected){
+            socket.auth = { token };
+            socket.connect();
+        }
+        return socket;
+    }
 
     socket = io (BACKEND_URL,{
-        auth: {token},
-        // withCredentials:true,
+        auth: { token },
+        withCredentials: true,
         transports: ["websocket", "polling"],
-        reconnectionAttempts:5,
-        reconnectionDelay:1000,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
     });
 
     // connections event
-
     socket.on("connect", () => {
-    console.log("socket connected", socket.id); 
-      socket.emit("user_connected", user._id);
-  });
+        console.log("socket connected", socket.id); 
+        const currentUser = useUserStore.getState().user;
+        if(currentUser?._id){
+            socket.emit("user_connected", currentUser._id);
+        }
+    });
 
     socket.on("connect_error",(error)=>{
-        console.error("socket connection error",error)
-        
-    })
+        console.error("socket connection error", error);
+    });
 
     // disconnect event
     socket.on("disconnect", (reason)=>{
-        console.log("socket disconnected",reason)
-        
-    })
-
-
+        console.log("socket disconnected", reason);
+    });
 
     return socket;
-    
-
 };
 
 export const getSocket = () =>{

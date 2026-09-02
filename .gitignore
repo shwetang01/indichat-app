@@ -1,9 +1,19 @@
-backend/.env/
-frontend/.env/
+# Environment files
+.env
+.env.*
+.env.local
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
 
+# Build and dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
 frontend/.next/
 frontend/out/
 frontend/dist/
+frontend/build/
+backend/dist/
 backend/dst/
-
-.env

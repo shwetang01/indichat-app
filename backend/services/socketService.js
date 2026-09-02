@@ -34,43 +34,68 @@ const initializeSocket = (server)=>{
         let userId = null;
 
         // handle user connection and marks them online in db
-
         socket.on("user_connected",async(connectingUserId)=>{
             try {
-                userId = connectingUserId
+                userId = connectingUserId || socket.user?.userId;
+                if(!userId) return;
                 socket.userId= userId;
-                onlineUsers.set(userId,socket.id);
-                socket.join(userId)   // join a prsonal room for direct emits
+                onlineUsers.set(userId.toString(), socket.id);
+                socket.join(userId.toString());   // join a personal room for direct emits
                 
                 // update user status in db 
-                await User.findByIdAndUpdate(userId,{
+                const updatedUser = await User.findByIdAndUpdate(userId,{
                     isOnline :true,
                     lastSeen: new Date(),
-                });
+                }, { new: true });
+
+                const lastSeenTime = updatedUser?.lastSeen || new Date();
 
                 // notify all users that this user is online
-                io.emit("user_status",{userId,isOnline:true});
+                io.emit("user_status",{
+                    userId: userId.toString(),
+                    isOnline: true,
+                    lastSeen: lastSeenTime
+                });
 
-
+                // send list of all currently online user IDs to the connected client
+                const onlineUserIds = Array.from(onlineUsers.keys());
+                socket.emit("online_users_list", onlineUserIds);
 
             } catch (error) {
                 console.error("Error handling user connection",error)
-
             }
-
         });
 
-        // return online status of requeted user
-
-        socket.on("get_user_status",(requestedUserId,callback)=>{
-            const isOnline = onlineUsers.has(requestedUserId)
-            callback({
-                userId:requestedUserId,
-                isOnline,
-                lastSeen: isOnline ? new Date() :null,
-            })
-
-        })
+        // return online status of requested user
+        socket.on("get_user_status", async (requestedUserId, callback)=>{
+            try {
+                if(!requestedUserId) return;
+                const isOnline = onlineUsers.has(requestedUserId.toString());
+                let lastSeen = null;
+                if(isOnline){
+                    lastSeen = new Date();
+                } else {
+                    const userDoc = await User.findById(requestedUserId).select("lastSeen isOnline");
+                    lastSeen = userDoc?.lastSeen || null;
+                }
+                if (typeof callback === "function") {
+                    callback({
+                        userId: requestedUserId.toString(),
+                        isOnline,
+                        lastSeen
+                    });
+                }
+            } catch (err) {
+                console.error("Error in get_user_status:", err);
+                if (typeof callback === "function") {
+                    callback({
+                        userId: requestedUserId ? requestedUserId.toString() : null,
+                        isOnline: false,
+                        lastSeen: null
+                    });
+                }
+            }
+        });
 
         // froward message to receiver if online
         socket.on("send_message",async(message)=>{
@@ -227,38 +252,43 @@ const initializeSocket = (server)=>{
             if(!userId) return ;
 
             try {
-                onlineUsers.delete(userId);
+                const uidStr = userId.toString();
+                if(onlineUsers.get(uidStr) === socket.id){
+                    onlineUsers.delete(uidStr);
+                }
 
                 // clear all typing timeouts
-                if(typingUsers.has(userId)) {
-                    const userTyping = typingUsers.get(userId);
+                if(typingUsers.has(uidStr)) {
+                    const userTyping = typingUsers.get(uidStr);
                     Object.keys(userTyping).forEach((key)=>{
                         if(key.endsWith('_timeout')) clearTimeout(userTyping[key])
                     })
 
-                    typingUsers.delete(userId)
-
+                    typingUsers.delete(uidStr)
                 }
-                await User.findByIdAndUpdate(userId,{
-                    isOnline:false,
-                    lastSeen:new Date(),
-                })
 
-                io.emit("user_status",{
-                    userId , isOnline :false,
-                    lastSeen: new Date(),
-                })
+                // If user has no more active socket connections
+                if(!onlineUsers.has(uidStr)){
+                    const disconnectTime = new Date();
+                    await User.findByIdAndUpdate(uidStr,{
+                        isOnline:false,
+                        lastSeen:disconnectTime,
+                    });
 
-                socket.leave(userId);
-                console.log(`user ${userId} disconnected`)
+                    io.emit("user_status",{
+                        userId: uidStr,
+                        isOnline :false,
+                        lastSeen: disconnectTime,
+                    });
+                }
 
+                socket.leave(uidStr);
+                console.log(`user ${uidStr} disconnected`)
 
             } catch (error) {
-                console.error("error handling disconnection",error)
-
+                console.error("error handling disconnection", error);
             }
-
-        }
+        };
 
         // disconnect event 
         socket.on("disconnect", handleDisconnected)

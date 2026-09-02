@@ -11,7 +11,7 @@ const useUserStore = create(
 
         }),
         {
-            name: "login-storage",
+            name: "user-storage",
             getStorage: ()=> localStorage
            
         }

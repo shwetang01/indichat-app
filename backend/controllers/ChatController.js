@@ -65,11 +65,9 @@ try {
 
     await message.save();
 
-    if(message?.content){
-      conversation.lastMessage = message?._id;
-
-    }
-    conversation.unreadCount+=1;
+    conversation.lastMessage = message?._id;
+    conversation.unreadCount = (conversation.unreadCount || 0) + 1;
+    conversation.updatedAt = new Date();
     await conversation.save();
 
     const populatedMessage = await Message.findOne(message?._id)
