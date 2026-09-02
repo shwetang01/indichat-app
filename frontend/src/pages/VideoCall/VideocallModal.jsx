@@ -165,14 +165,15 @@ const VideocallModal = ({ socket }) => {
     // Handle ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate && socket) {
+        const { currentCall: liveCall, incomingCall: liveIncoming } = useVideoCallStore.getState();
         const participantId =
-          currentCall?.participantId || incomingCall?.callerId;
-        const callId = currentCall?.callId || incomingCall?.callId;
+          liveCall?.participantId || liveIncoming?.callerId;
+        const callId = liveCall?.callId || liveIncoming?.callId;
 
         if (participantId && callId) {
           socket.emit("webrtc_ice_candidate", {
             candidate: event.candidate,
-            receiverId: participantId,
+            receiverId: participantId.toString(),
             callId: callId,
           });
         }
@@ -213,25 +214,28 @@ const VideocallModal = ({ socket }) => {
   const initializeCallerCall = async () => {
     try {
       setCallStatus("connecting");
+      const { currentCall: liveCall, callType: liveCallType } = useVideoCallStore.getState();
 
-      //get media
-      const stream = await initializeMedia(callType === "video");
+      // get media
+      const stream = await initializeMedia(liveCallType === "video");
 
-      //create peer connection with offer
+      // create peer connection with offer
       const pc = createPeerConnection(stream, "CALLER");
 
       const offer = await pc.createOffer({
         offerToReceiveAudio: true,
-        offerToReceiveVideo: callType === "video",
+        offerToReceiveVideo: liveCallType === "video",
       });
 
       await pc.setLocalDescription(offer);
 
-      socket.emit("webrtc_offer", {
-        offer,
-        receiverId: currentCall?.participantId,
-        callId: currentCall?.callId,
-      });
+      if (liveCall?.participantId) {
+        socket.emit("webrtc_offer", {
+          offer,
+          receiverId: liveCall.participantId.toString(),
+          callId: liveCall.callId,
+        });
+      }
     } catch (error) {
       console.error("caller error", error);
       setCallStatus("failed");
@@ -239,21 +243,21 @@ const VideocallModal = ({ socket }) => {
     }
   };
 
-  //receiver : answer call
-
+  // receiver: answer call
   const handleAnswerCall = async () => {
     try {
       setCallStatus("connecting");
+      const { incomingCall: liveIncoming, callType: liveCallType } = useVideoCallStore.getState();
 
-      //get media
-      const stream = await initializeMedia(callType === "video");
+      // get media
+      const stream = await initializeMedia(liveCallType === "video");
 
-      //create peer connection with offer
+      // create peer connection with offer
       createPeerConnection(stream, "RECEIVER");
 
       socket.emit("accept_call", {
-        callerId: incomingCall?.callerId,
-        callId: incomingCall?.callId,
+        callerId: liveIncoming?.callerId?.toString(),
+        callId: liveIncoming?.callId,
         receiverInfo: {
           username: user?.username,
           profilePicture: user?.profilePicture,
@@ -261,10 +265,10 @@ const VideocallModal = ({ socket }) => {
       });
 
       setCurrentCall({
-        callId: incomingCall?.callId,
-        participantId: incomingCall?.callerId,
-        participantName: incomingCall?.callerName,
-        participantAvatar: incomingCall?.callerAvatar,
+        callId: liveIncoming?.callId,
+        participantId: liveIncoming?.callerId,
+        participantName: liveIncoming?.callerName,
+        participantAvatar: liveIncoming?.callerAvatar,
       });
 
       clearIncomingCall();
@@ -275,23 +279,25 @@ const VideocallModal = ({ socket }) => {
   };
 
   const handleRejectCall = () => {
-    if (incomingCall) {
+    const { incomingCall: liveIncoming } = useVideoCallStore.getState();
+    if (liveIncoming) {
       socket.emit("reject_call", {
-        callerId: incomingCall?.callerId,
-        callId: incomingCall?.callId,
+        callerId: liveIncoming.callerId?.toString(),
+        callId: liveIncoming.callId,
       });
     }
     endCall();
   };
 
   const handleEndCall = () => {
-    const participantId = currentCall?.participantId || incomingCall?.callerId;
-    const callId = currentCall?.callId || incomingCall?.callId;
+    const { currentCall: liveCall, incomingCall: liveIncoming } = useVideoCallStore.getState();
+    const participantId = liveCall?.participantId || liveIncoming?.callerId;
+    const callId = liveCall?.callId || liveIncoming?.callId;
 
     if (participantId && callId) {
       socket.emit("end_call", {
         callId: callId,
-        participantId: participantId,
+        participantId: participantId.toString(),
       });
     }
     endCall();
@@ -303,10 +309,11 @@ const VideocallModal = ({ socket }) => {
 
     // call accepted start caller flow
     const handleCallAccepted = ({ receiverName }) => {
-      if (currentCall) {
+      const liveCall = useVideoCallStore.getState().currentCall;
+      if (liveCall) {
         setTimeout(() => {
           initializeCallerCall();
-        }, 500);
+        }, 300);
       }
     };
 
@@ -319,124 +326,70 @@ const VideocallModal = ({ socket }) => {
       endCall();
     };
 
-    // const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
-    //   if (!peerConnection) return;
-
-    //   try {
-    //     await peerConnection.setRemoteDescription(
-    //       new RTCSessionDescription(offer)
-    //     );
-
-    //     //process queued ICE candidate
-    //     await processQueuedIceCandidates();
-
-    //     //create answer
-    //     const answer = await peerConnection.createAnswer();
-    //     await peerConnection.setLocalDescription(answer);
-
-    //     socket.emit("webrtc_answer", {
-    //       answer,
-    //       receiverId: senderId,
-    //       callId,
-    //     });
-
-    //     console.log("Receiver: Answer send waiting for ice candidates");
-    //   } catch (error) {
-    //     console.error("Receiver offer error", error);
-    //   }
-    // };
-
     const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
-  let pc = peerConnection;
+      let pc = useVideoCallStore.getState().peerConnection;
+      const { callType: liveCallType } = useVideoCallStore.getState();
 
-  try {
-    // 🔥 create peer connection if not exists
-    if (!pc) {
-      const stream = await initializeMedia(callType === "video");
-      pc = createPeerConnection(stream, "RECEIVER");
-    }
+      try {
+        if (!pc) {
+          const stream = await initializeMedia(liveCallType === "video");
+          pc = createPeerConnection(stream, "RECEIVER");
+        }
 
-    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        await useVideoCallStore.getState().processQueuedIceCandidates();
 
-    // process queued ICE candidates
-    await processQueuedIceCandidates();
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
 
-    // create answer
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
+        socket.emit("webrtc_answer", {
+          answer,
+          receiverId: senderId?.toString(),
+          callId,
+        });
 
-    socket.emit("webrtc_answer", {
-      answer,
-      receiverId: senderId,
-      callId,
-    });
-
-    console.log("✅ Receiver: Answer sent");
-  } catch (error) {
-    console.error("❌ Receiver offer error", error);
-  }
-};
-
-    //Receiver answer (caller)
-    // const handleWebRTCAnswer = async ({answer, senderId, callId}) => {
-    //   if (!peerConnection) return;
-
-    //   if (peerConnection.signalingState === "closed") {
-    //     console.log("Caller: Peer connection is closed");
-    //     return;
-    //   }
-
-    //   try {
-    //     // current caller signing
-    //     await peerConnection.setRemoteDescription(
-    //       new RTCSessionDescription(answer)
-    //     );
-
-    //     // process queued ICE candidate
-    //     await processQueuedIceCandidates();
-
-    //     // check receiver
-    //     const receivers = peerConnection.getReceivers();
-    //     console.log("Receiver", receivers);
-    //   } catch (error) {
-    //     console.error("caller answer error", error);
-    //   }
-    // };
+        console.log("✅ Receiver: Answer sent");
+      } catch (error) {
+        console.error("❌ Receiver offer error", error);
+      }
+    };
 
     const handleWebRTCAnswer = async ({ answer, senderId, callId }) => {
-  if (!peerConnection) {
-    console.log("❌ No peerConnection on caller");
-    return;
-  }
+      const pc = useVideoCallStore.getState().peerConnection;
+      if (!pc) {
+        console.log("❌ No peerConnection on caller");
+        return;
+      }
 
-  try {
-    await peerConnection.setRemoteDescription(
-      new RTCSessionDescription(answer)
-    );
+      try {
+        await pc.setRemoteDescription(
+          new RTCSessionDescription(answer)
+        );
 
-    await processQueuedIceCandidates();
+        await useVideoCallStore.getState().processQueuedIceCandidates();
 
-    console.log("✅ Caller: Answer received & set");
-  } catch (error) {
-    console.error("❌ caller answer error", error);
-  }
-};
+        console.log("✅ Caller: Answer received & set");
+      } catch (error) {
+        console.error("❌ caller answer error", error);
+      }
+    };
 
-    //Receiver ICE candidates
+    // Receiver ICE candidates
     const handleWebRTCIceCandidates = async ({ candidate, senderId }) => {
-      if (peerConnection && peerConnection.signalingState !== "closed") {
-        if (peerConnection.remoteDescription) {
+      const pc = useVideoCallStore.getState().peerConnection;
+      if (pc && pc.signalingState !== "closed") {
+        if (pc.remoteDescription && pc.remoteDescription.type) {
           try {
-            await peerConnection.addIceCandidate(
+            await pc.addIceCandidate(
               new RTCIceCandidate(candidate)
             );
-            console.log("ICE candidate added");
+            console.log("✅ ICE candidate added");
           } catch (error) {
             console.log("ICE candidate error", error);
           }
         } else {
           console.log("queuing ice candidates");
-          addIceCandidate(candidate);
+          useVideoCallStore.getState().addIceCandidate(candidate);
         }
       }
     };
