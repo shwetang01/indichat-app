@@ -49,7 +49,7 @@ try {
 
     await status.save();
 
-    const populatedStatus = await Status.findOne(status?._id)
+    const populatedStatus = await Status.findById(status?._id)
     .populate("user","username profilePicture")
     .populate("viewers","username profilePicture")
 
@@ -84,7 +84,7 @@ exports.getStatuses = async(req,res) =>{
         
     } catch (error) {
          console.error(error);
-        return response(res,500,"Internal sarver error");
+        return response(res,500,"Internal server error");
 
     }
 };
@@ -111,13 +111,7 @@ exports.viewStatus = async(req,res) =>{
                 // broadcast to all conncting user excpect the creater
                const statusOwnerSocketId = req.socketUserMap.get(status.user._id.toString())
                if(statusOwnerSocketId){
-                const viewData = {
-                    statusId,
-                    viewerId:userId,
-                    totalViewers:updateStatus.viewers.length,
-                    viewers:updateStatus.viewers
-                }
-                req.io.to(statusOwnerSocketId).emit("status_viewed",viewData)
+                req.io.to(statusOwnerSocketId).emit("status_viewed", statusId, updateStatus.viewers)
 
                }else{
                     console.log('status owner not connected')
@@ -133,7 +127,7 @@ exports.viewStatus = async(req,res) =>{
 
     } catch (error) {
         console.error(error);
-        return response(res,500,"Internal sarver error");
+        return response(res,500,"Internal server error");
     }
 
 };
@@ -168,7 +162,7 @@ exports.deleteStatus = async(req,res) =>{
 
     } catch (error) {
         console.error(error);
-     return response(res,500,"Internal sarver error");
+     return response(res,500,"Internal server error");
     }
 
 };

@@ -187,7 +187,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
         <span
           className={`px-4 py-2 rounded-full text-sm ${
             theme === "dark"
-              ? "bg-gary-700 text-gray-300"
+              ? "bg-gray-700 text-gray-300"
               : "bg-gray-200 text-gray-600"
           }`}
         >
@@ -280,7 +280,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
         className={`p-4 ${
           theme === "dark"
             ? "bg-[#303430] text-white"
-            : "bg-[[#dbeafe] text-gray-600"
+            : "bg-[#dbeafe] text-gray-600"
         } flex items-center `}
       >
         <button
@@ -373,7 +373,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
           : (  <img
             src={filePreview}
             alt="file-preview"
-            className="w-80 0bject-cover rounded shadow-lg mx-auto"
+            className="w-80 object-cover rounded shadow-lg mx-auto"
           /> )
         }
 
@@ -383,7 +383,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
               setSelectedFile(null);
               setFilePreview(null);
             }}
-            className="absolute top-1 right-1 bg-red-500 hover:bg-red-650 text-white rounded-full p-1"
+            className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
           >
             <FaTimes className="h-4 w-4" />
           </button>
@@ -447,7 +447,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
               <button
                 onClick={() => fileInputRef.current.click()}
                 className={`flex items-center px-4 py-2 w-full transition-colors  ${
-                  theme === "dark" ? "hover: bg-gray-500" : "hover:bg-gray-100"
+                  theme === "dark" ? "hover:bg-gray-500" : "hover:bg-gray-100"
                 }`}
               >
                 <FaImage className="mr-2" /> Image/video
@@ -456,7 +456,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
               <button
                 onClick={() => fileInputRef.current.click()}
                 className={`flex items-center px-4 w-full transition-color  ${
-                  theme === "dark" ? "hover: bg-gray-500" : "hover:bg-gray-100"
+                  theme === "dark" ? "hover:bg-gray-500" : "hover:bg-gray-100"
                 }`}
               >
                 <FaFile className="mr-2" /> Documents

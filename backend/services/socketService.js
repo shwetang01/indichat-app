@@ -217,9 +217,9 @@ const initializeSocket = (server)=>{
 
                 }
 
-                await message.save();
+                 await message.save();
 
-                 const populatedMessage = await Message.findOne(message?._id)
+                 const populatedMessage = await Message.findById(message?._id)
                 .populate("sender","username profilePicture")
                 .populate("receiver","username profilePicture")
                 .populate("reactions.user","username")

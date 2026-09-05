@@ -27,7 +27,7 @@ const loginValidationSchema = yup
       .string()
       .nullable()
       .notRequired()
-      .matches(/^\d+$/, "Phone number be digit")
+      .matches(/^\d+$/, "Phone number must be digits")
       .transform((value, originalValue) =>
         originalValue.trim() === "" ? null : value
       ),
@@ -52,7 +52,7 @@ const loginValidationSchema = yup
 const otpValidationSchema = yup.object().shape({
   otp: yup
     .string()
-    .length(6, "otp mest be exactly 6 digit")
+    .length(6, "OTP must be exactly 6 digits")
     .required("otp is required"),
 });
 
@@ -153,7 +153,7 @@ const Login = () => {
       }
       if (response.status === "success") {
         
-        toast.success("Otp verify successfully");
+        toast.success("Otp verified successfully");
 
         const token = response.data?.token;
         localStorage.setItem("auth_token",token)
@@ -306,7 +306,7 @@ const Login = () => {
 
         {step === 1 && (
           <form
-            className="spacce -y-4"
+            className="space-y-4"
             onSubmit={handleLoginSubmit(onLoginSubmit)}
           >
             <p
@@ -357,7 +357,7 @@ const Login = () => {
                             theme === "dark"
                               ? "bg-gray-600 border-gray-500 text-white "
                               : "bg-white border-gray-300"
-                          }rounded-md text-sm focus:outline-none focus:ring-green-500`}
+                          } rounded-md text-sm focus:outline-none focus:ring-green-500`}
                         />
                       </div>
 
@@ -416,7 +416,7 @@ const Login = () => {
                     theme === "dark"
                       ? "bg-gray-700 text-white"
                       : "bg-white border-gray-300"
-                  }rounded-md focus:ring-green-500 focus:right-2 focus:outline-none ${
+                  } rounded-md focus:ring-green-500 focus:right-2 focus:outline-none ${
                     loginErrors.phoneNumber
                       ? "border-red-500"
                       : "border-gray-300"
@@ -554,7 +554,7 @@ const Login = () => {
               className="hidden"           
               />
             </div>
-            <p className={`text-sm ${theme === 'dark'?"text-gray-300":"text-gray-500"}mb-2`} >
+            <p className={`text-sm ${theme === 'dark'?"text-gray-300":"text-gray-500"} mb-2`} >
               Choose an avatar
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -598,7 +598,7 @@ const Login = () => {
               <input 
               {...profileRegister('agreed')}
               type="checkbox"
-              className={`rounded ${theme === 'dark'?"text-green-500 bg-gray-700":"text-green-500"}focus:ring-green-500`}
+              className={`rounded ${theme === 'dark'?"text-green-500 bg-gray-700":"text-green-500"} focus:ring-green-500`}
 
               /> 
 

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo } from "react";
 
 import useUserStore from "../../store/useUserStore";
 import useThemeStore from "../../store/themeStore";
-import { FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes, FaViadeo, FaVideo, FaVideoSlash } from "react-icons/fa";
+import { FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes, FaVideo, FaVideoSlash } from "react-icons/fa";
 import useVideoCallStore from "../../store/videoCallStore";
 
 

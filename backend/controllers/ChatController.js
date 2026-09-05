@@ -70,7 +70,7 @@ try {
     conversation.updatedAt = new Date();
     await conversation.save();
 
-    const populatedMessage = await Message.findOne(message?._id)
+    const populatedMessage = await Message.findById(message?._id)
     .populate("sender","username profilePicture")
     .populate("receiver","username profilePicture")
 
@@ -90,7 +90,7 @@ try {
 
 } catch (error) {
      console.error(error);
-    return response(res,500,'Internal sarver error');
+    return response(res,500,'Internal server error');
         
 }
 
@@ -117,7 +117,7 @@ exports.getConversation = async(req,res)=>{
     return response(res,201,"Conversation get successful",conversation)
     } catch (error) {
         console.error(error);
-        return response(res,500,'Internal sarver error');
+        return response(res,500,'Internal server error');
     }
 };
 
@@ -156,7 +156,7 @@ exports.getMessages = async(req,res) =>{
         
     } catch (error) {
         console.error(error);
-        return response(res,500,'Internal sarver error');
+        return response(res,500,'Internal server error');
     }
 }
 
@@ -191,7 +191,6 @@ exports.markAsRead = async(req,res)=>{
                         messageStatus:"read",
                     };
                     req.io.to(senderSocketId).emit("message_read",updatedMessage);
-                    await message.save();
                 }
 
                }
@@ -205,7 +204,7 @@ exports.markAsRead = async(req,res)=>{
 
     } catch (error) {
          console.error(error);
-        return response(res,500,'Internal sarver error');
+        return response(res,500,'Internal server error');
     }
 
 };
@@ -231,7 +230,7 @@ exports.deleteMessage = async(req,res) =>{
             if(req.io && req.socketUserMap){
                 const receiverSocketId = req.socketUserMap.get(message.receiver.toString())
                 if(receiverSocketId){
-                    req.io.to(receiverSocketId).emit("message_deleted",messageId)
+                    req.io.to(receiverSocketId).emit("message_deleted",{ deletedMessageId: messageId })
                 }
               
             }
